@@ -1,0 +1,31 @@
+﻿@model List<LibraryManagement.Models.BookModel>
+
+@{
+    ViewData["Title"] = "Books";
+}
+
+<a class="btn btn-primary mt-3 ms-2" href="/Book/Create">Add New Book</a>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>BookID</th> <!-- Add this line -->
+            <th>BookName</th>
+            <th>Author</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.BookId</td> <!-- Add this line -->
+                <td>@item.BookName</td>
+                <td>@item.Author</td>
+                <td>
+                    <a class="btn btn-warning btn-sm" href="/Book/Edit/@item.BookId">Edit</a>
+                    <a class="btn btn-danger btn-sm" href="/Book/Delete/@item.BookId" onclick="return confirm('Are you sure?')">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

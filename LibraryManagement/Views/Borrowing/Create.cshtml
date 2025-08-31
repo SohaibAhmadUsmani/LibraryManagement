@@ -1,0 +1,45 @@
+﻿@model LibraryManagement.Models.BorrowingModel
+@{
+    ViewData["Title"] = "Add Borrowing";
+}
+<h2>Add Borrowing</h2>
+
+<form asp-action="Create" method="post" onsubmit="return validateForm();">
+    <div class="mb-3">
+        <label>StudentName</label>
+        <input asp-for="StudentName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>BookName</label>
+        <input asp-for="BookName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>BorrowDate</label>
+        <input asp-for="BorrowDate" type="date" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>ReturnedDate</label>
+        <input asp-for="ReturnedDate" type="date" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success">Add</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+<script>
+    function validateForm() {
+        const studentname = document.querySelector('[name="StudentName"]').value.trim();
+        const bookname = document.querySelector('[name="BookName"]').value.trim();
+        const borrowdate = document.querySelector('[name="BorrowDate"]').value.trim();
+        const returneddate = document.querySelector('[name="ReturnedDate"]').value.trim();
+
+        if (!studentname || !bookname || !borrowdate || !returneddate) {
+            alert("All fields are required: StudentName, BookName, BorrowDate, and ReturnedDate.");
+            return false; // prevent form submission
+        }
+
+        return true; // allow submission
+    }
+</script>
+
+
+

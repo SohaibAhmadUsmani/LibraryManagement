@@ -1,0 +1,53 @@
+﻿CREATE DATABASE LibraryDB;
+
+   USE LibraryDB;
+
+
+   CREATE TABLE Students (
+    StudentId INT PRIMARY KEY IDENTITY(1,1),
+    StudentName NVARCHAR(100),
+    Email NVARCHAR(100),
+    Phone NVARCHAR(20)
+);
+
+
+
+   CREATE TABLE Books (
+    BookId INT IDENTITY(1,1) PRIMARY KEY,
+    BookName NVARCHAR(100),
+    Author NVARCHAR(100)
+    
+);
+
+
+
+ CREATE TABLE Librarians (
+    LibrarianId INT PRIMARY KEY IDENTITY(1,1),
+    Name NVARCHAR(100),
+    Age INT,
+    Phone NVARCHAR(100)
+  
+);
+
+
+
+CREATE TABLE Borrowings (
+    BorrowingId INT IDENTITY(1,1) PRIMARY KEY,
+    StudentName NVARCHAR(100),
+    BookName NVARCHAR(100),
+    BorrowDate DATE,
+    ReturnedDate DATE
+);
+
+
+
+If IDENTITY jumps and
+If you want your Id to continue correctly (e.g., after deleting test data), just reseed once in sql query
+
+
+DBCC CHECKIDENT ('Students', RESEED, 0); [Next insert will create 1]
+
+DBCC CHECKIDENT ('Students', RESEED, 2); [Next insert will create 3]
+DBCC CHECKIDENT ('Books', RESEED, 4);    [Next insert will create 5]
+DBCC CHECKIDENT ('Borrowings', RESEED, 3);  [Next insert will create 4]
+DBCC CHECKIDENT ('Librarians', RESEED, 2);  [Next insert will create 3]

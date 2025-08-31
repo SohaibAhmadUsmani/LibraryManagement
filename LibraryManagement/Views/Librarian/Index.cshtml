@@ -1,0 +1,35 @@
+﻿@model List<LibraryManagement.Models.LibrarianModel>
+
+@{
+    ViewData["Title"] = "Librarians";
+}
+
+<a class="btn btn-primary mt-3 ms-2" href="/Librarian/Create">Add New Librarian</a>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>LibrarianID</th> <!-- Add this line -->
+            <th>Name</th>
+            <th>Age</th>
+            <th>Phone</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.LibrarianId</td> <!-- Add this line -->
+                <td>@item.Name</td>
+                <td>@item.Age</td>
+                <td>@item.Phone</td>
+                <td>
+                    <a class="btn btn-warning btn-sm" href="/Librarian/Edit/@item.LibrarianId">Edit</a>
+                    <a class="btn btn-danger btn-sm" href="/Librarian/Delete/@item.LibrarianId" onclick="return confirm('Are you sure?')">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+

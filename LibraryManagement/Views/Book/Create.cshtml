@@ -1,0 +1,32 @@
+﻿@model LibraryManagement.Models.BookModel
+@{
+    ViewData["Title"] = "Add Book";
+}
+<h2>Add Book</h2>
+
+<form asp-action="Create" method="post" onsubmit="return validateForm();">
+    <div class="mb-3">
+        <label>BookName</label>
+        <input asp-for="BookName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Author</label>
+        <input asp-for="Author" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success">Add</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+<script>
+    function validateForm() {
+        const bookname = document.querySelector('[name="BookName"]').value.trim();
+        const author = document.querySelector('[name="Author"]').value.trim();
+
+        if (!bookname || !author) {
+            alert("All fields are required: BookName, Author.");
+            return false; // prevent form submission
+        }
+
+        return true; // allow submission
+    }
+</script>

@@ -1,0 +1,33 @@
+﻿@model List<LibraryManagement.Models.BorrowingModel>
+@{
+    ViewData["Title"] = "Borrowing List";
+}
+
+<a class="btn btn-primary mt-3 ms-2" href="/Borrowing/Create">Add New Borrowing</a>
+
+<table class="table table-bordered mt-3">
+    <tr>
+        <th>BorrowingID</th>
+        <th>StudentName</th>
+        <th>BookName</th>
+        <th>BorrowDate</th>
+        <th>ReturnedDate</th>
+        <th>Actions</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.BorrowingId</td>
+            <td>@item.StudentName</td>
+            <td>@item.BookName</td>
+            <td>@item.BorrowDate.ToShortDateString()</td>
+            <td>@item.ReturnedDate.ToShortDateString()</td>
+            <td>
+                <a href="/Borrowing/Edit/@item.BorrowingId" class="btn btn-warning btn-sm">Edit</a>
+                <a href="/Borrowing/Delete/@item.BorrowingId" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+        </tr>
+    }
+</table>
+
+

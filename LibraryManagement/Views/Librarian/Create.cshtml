@@ -1,0 +1,39 @@
+﻿@model LibraryManagement.Models.LibrarianModel
+@{
+    ViewData["Title"] = "Add Librarian";
+}
+<h2>Add Librarian</h2>
+
+<form asp-action="Create" method="post" onsubmit="return validateForm();">
+    <div class="mb-3">
+        <label>Name</label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Age</label>
+        <input asp-for="Age" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Phone</label>
+        <input asp-for="Phone" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success">Add</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+<script>
+    function validateForm() {
+        const name = document.querySelector('[name="Name"]').value.trim();
+        const age = document.querySelector('[name="Age"]').value.trim();
+        const phone = document.querySelector('[name="Phone"]').value.trim();
+
+        if (!name || !age || !phone) {
+            alert("All fields are required: Name, Age, Phone.");
+            return false; // prevent form submission
+        }
+
+        return true; // allow submission
+    }
+</script>
+
+

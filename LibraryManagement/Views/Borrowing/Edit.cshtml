@@ -1,0 +1,29 @@
+﻿@model LibraryManagement.Models.BorrowingModel
+@{
+    ViewData["Title"] = "Edit Borrowing";
+}
+<h2>Edit Borrowing</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="BorrowingId" />
+    <div class="mb-3">
+        <label>StudentName</label>
+        <input asp-for="StudentName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>BookName</label>
+        <input asp-for="BookName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>BorrowDate</label>
+        <input asp-for="BorrowDate" type="date" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>ReturnedDate</label>
+        <input asp-for="ReturnedDate" type="date" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+

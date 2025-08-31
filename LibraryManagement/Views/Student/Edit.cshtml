@@ -1,0 +1,25 @@
+﻿@model LibraryManagement.Models.StudentModel
+@{
+    ViewData["Title"] = "Edit StudentModel";
+}
+<h2>Edit Student</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="StudentId" />
+    <div class="mb-3">
+        <label>StudentName</label>
+        <input asp-for="StudentName" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Email</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Phone</label>
+        <input asp-for="Phone" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+
