@@ -8,7 +8,7 @@ namespace LibraryManagement.Controllers
     
     public class DashboardController : Controller
     {
-        private readonly string _connectionString = "Server=DESKTOP-DASLLN7;Database=LibraryDB;Trusted_Connection=True;TrustServerCertificate=True;";
+        private readonly string _connectionString = "Server=SOHAIB-PC;Database=LibraryDB;Trusted_Connection=True;TrustServerCertificate=True;";
 
         public IActionResult Index()
         {
