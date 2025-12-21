@@ -1,19 +1,44 @@
 ﻿@model LibraryManagement.Models.BookModel
 @{
-    ViewData["Title"] = "Edit BookModel";
+    ViewData["Title"] = "Edit Book";
 }
-<h2>Edit Book</h2>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="BookId" />
-    <div class="mb-3">
-        <label>BookName</label>
-        <input asp-for="BookName" class="form-control" />
+<div class="container mt-4">
+    <h2>Edit Book</h2>
+
+    @if (ViewBag.Error != null)
+    {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+    }
+
+    <div class="card" style="max-width:  600px;">
+        <div class="card-body">
+            <form method="post" action="/Book/Edit">
+                <input type="hidden" name="BookId" value="@Model.BookId">
+
+                <div class="mb-3">
+                    <label class="form-label">Book Name</label>
+                    <input type="text" name="BookName" class="form-control" value="@Model.BookName" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Author</label>
+                    <input type="text" name="Author" class="form-control" value="@Model.Author">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Publisher</label>
+                    <input type="text" name="Publisher" class="form-control" value="@Model.Publisher">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" name="Quantity" class="form-control" value="@Model.Quantity" min="0">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update Book</button>
+                <a href="/Book" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
     </div>
-    <div class="mb-3">
-        <label>Author</label>
-        <input asp-for="Author" class="form-control" />
-    </div>
-    <button type="submit" class="btn btn-primary">Update</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+</div>

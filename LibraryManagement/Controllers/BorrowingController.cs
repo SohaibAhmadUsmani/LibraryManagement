@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Data;
-using LibraryManagement.Models;
 using Microsoft.Data.SqlClient;
+using LibraryManagement.Models;
 
 namespace LibraryManagement.Controllers
 {
@@ -16,85 +15,47 @@ namespace LibraryManagement.Controllers
 
         public IActionResult Index()
         {
-            List<BorrowingModel> list = new();
-            using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var cmd = new SqlCommand("SELECT * FROM Borrowings", con);
-            con.Open();
-            var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            var borrowings = new List<BorrowRequestModel>();
+            string connString = _config.GetConnectionString("DefaultConnection");
+
+            using (var con = new SqlConnection(connString))
             {
-                list.Add(new BorrowingModel
+                con.Open();
+
+                SqlCommand cmd = new SqlCommand("SELECT RequestId, StudentName, BookName, RequestDate, Status, ApprovedDate, DueDate, ReturnedDate FROM BorrowRequests ORDER BY RequestDate DESC", con);
+
+                using (var reader = cmd.ExecuteReader())
                 {
-                    BorrowingId = Convert.ToInt32(reader["BorrowingId"]),
-                    StudentName = reader["StudentName"].ToString(),
-                    BookName = reader["BookName"].ToString(),
-                    BorrowDate = Convert.ToDateTime(reader["BorrowDate"]),
-                    ReturnedDate = Convert.ToDateTime(reader["ReturnedDate"])
-                });
+                    while (reader.Read())
+                    {
+                        var req = new BorrowRequestModel();
+                        req.RequestId = (int)reader["RequestId"];
+                        req.StudentName = reader["StudentName"].ToString();
+                        req.BookName = reader["BookName"].ToString();
+                        req.RequestDate = (DateTime)reader["RequestDate"];
+                        req.Status = reader["Status"].ToString();
+
+                        if (reader["ApprovedDate"] != DBNull.Value)
+                        {
+                            req.ApprovedDate = (DateTime)reader["ApprovedDate"];
+                        }
+
+                        if (reader["DueDate"] != DBNull.Value)
+                        {
+                            req.DueDate = (DateTime)reader["DueDate"];
+                        }
+
+                        if (reader["ReturnedDate"] != DBNull.Value)
+                        {
+                            req.ReturnedDate = (DateTime)reader["ReturnedDate"];
+                        }
+
+                        borrowings.Add(req);
+                    }
+                }
             }
-            return View(list);
-        }
 
-        [HttpGet]
-        public IActionResult Create() => View();
-
-        [HttpPost]
-        public IActionResult Create(BorrowingModel model)
-        {
-            using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var cmd = new SqlCommand("INSERT INTO Borrowings (StudentName, BookName, BorrowDate, ReturnedDate) VALUES (@studentname, @bookname, @borrowdate, @returneddate)", con);
-            cmd.Parameters.AddWithValue("@studentname", model.StudentName);
-            cmd.Parameters.AddWithValue("@bookname", model.BookName);
-            cmd.Parameters.AddWithValue("@borrowdate", model.BorrowDate);
-            cmd.Parameters.AddWithValue("@returneddate", model.ReturnedDate);
-            con.Open();
-            cmd.ExecuteNonQuery();
-            return RedirectToAction("Index");
-        }
-
-        [HttpGet]
-        public IActionResult Edit(int id)
-        {
-            BorrowingModel model = new();
-            using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var cmd = new SqlCommand("SELECT * FROM Borrowings WHERE BorrowingId=@id", con);
-            cmd.Parameters.AddWithValue("@id", id);
-            con.Open();
-            var reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
-                model.BorrowingId = Convert.ToInt32(reader["BorrowingId"]);
-                model.StudentName = reader["StudentName"].ToString();
-                model.BookName = reader["BookName"].ToString();
-                model.BorrowDate = Convert.ToDateTime(reader["BorrowDate"]);
-                model.ReturnedDate = Convert.ToDateTime(reader["ReturnedDate"]);
-            }
-            return View(model);
-        }
-
-        [HttpPost]
-        public IActionResult Edit(BorrowingModel model)
-        {
-            using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var cmd = new SqlCommand("UPDATE Borrowings SET StudentName=@studentname, BookName=@bookname, BorrowDate=@borrowdate, ReturnedDate=@returneddate WHERE BorrowingId=@id", con);
-            cmd.Parameters.AddWithValue("@studentname", model.StudentName);
-            cmd.Parameters.AddWithValue("@bookname", model.BookName);
-            cmd.Parameters.AddWithValue("@borrowdate", model.BorrowDate);
-            cmd.Parameters.AddWithValue("@returneddate", model.ReturnedDate);
-            cmd.Parameters.AddWithValue("@id", model.BorrowingId);
-            con.Open();
-            cmd.ExecuteNonQuery();
-            return RedirectToAction("Index");
-        }
-
-        public IActionResult Delete(int id)
-        {
-            using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            var cmd = new SqlCommand("DELETE FROM Borrowings WHERE BorrowingId=@id", con);
-            cmd.Parameters.AddWithValue("@id", id);
-            con.Open();
-            cmd.ExecuteNonQuery();
-            return RedirectToAction("Index");
+            return View(borrowings);
         }
     }
 }

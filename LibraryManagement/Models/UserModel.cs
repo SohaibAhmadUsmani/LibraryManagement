@@ -6,10 +6,13 @@
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty; // Admin, Student, Librarian
+        public string Role { get; set; } = string.Empty;       // Admin, Student, Librarian
+        public string Status { get; set; } = "Pending";        // Pending, Approved, Rejected
         public string FullName { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; }
+        public DateTime? ApprovedDate { get; set; }
+        public int? ApprovedBy { get; set; }
         public bool IsActive { get; set; } = true;
     }
 }

@@ -1,0 +1,40 @@
+﻿@model LibraryManagement.Models.UserModel
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container mt-4">
+    <h2>My Profile</h2>
+    
+    <div class="card" style="max-width: 500px;">
+        <div class="card-header">
+            <h5>Profile Information</h5>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <tr>
+                    <th>Full Name: </th>
+                    <td>@Model.FullName</td>
+                </tr>
+                <tr>
+                    <th>Username: </th>
+                    <td>@Model.Username</td>
+                </tr>
+                <tr>
+                    <th>Email:</th>
+                    <td>@Model.Email</td>
+                </tr>
+                <tr>
+                    <th>Phone:</th>
+                    <td>@Model.Phone</td>
+                </tr>
+                <tr>
+                    <th>Role:</th>
+                    <td>@Model. Role</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <a href="/StudentDashboard" class="btn btn-secondary mt-3">Back to Dashboard</a>
+</div>

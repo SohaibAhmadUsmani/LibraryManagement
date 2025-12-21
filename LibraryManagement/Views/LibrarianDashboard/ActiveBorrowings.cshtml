@@ -1,0 +1,66 @@
+﻿@model List<LibraryManagement.Models.BorrowRequestModel>
+@{
+    ViewData["Title"] = "Active Borrowings";
+}
+
+<div class="container mt-4">
+    <h2>Active Borrowings</h2>
+
+    @if (TempData["Success"] != null)
+    {
+            <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            @if (Model != null && Model.Count > 0)
+            {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Book Name</th>
+                                <th>Borrowed Date</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model)
+                        {
+                                    <tr>
+                                        <td>@item.StudentName</td>
+                                        <td>@item. BookName</td>
+                                        <td>@(item.ApprovedDate.HasValue ? item.ApprovedDate.Value.ToString("MMM dd, yyyy") : "-")</td>
+                                        <td>@(item.DueDate.HasValue ? item.DueDate.Value.ToString("MMM dd, yyyy") : "-")</td>
+                                        <td>
+                                    @if (item.DueDate.HasValue && item.DueDate.Value < DateTime.Now)
+                                    {
+                                                    <span class="badge bg-danger">Overdue</span>
+                                    }
+                                    else
+                                    {
+                                                    <span class="badge bg-success">Active</span>
+                                    }
+                                        </td>
+                                        <td>
+                                            <form method="post" action="/LibrarianDashboard/ReturnBook">
+                                                <input type="hidden" name="requestId" value="@item. RequestId">
+                                                <button type="submit" class="btn btn-primary btn-sm">Return Book</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                        }
+                        </tbody>
+                    </table>
+            }
+            else
+            {
+                    <p class="text-muted text-center">No active borrowings. </p>
+            }
+        </div>
+    </div>
+
+    <a href="/LibrarianDashboard" class="btn btn-secondary mt-3">Back to Dashboard</a>
+</div>

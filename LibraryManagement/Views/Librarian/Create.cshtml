@@ -1,39 +1,52 @@
 ﻿@model LibraryManagement.Models.LibrarianModel
 @{
-    ViewData["Title"] = "Add Librarian";
+    ViewData["Title"] = "Add New Librarian";
 }
-<h2>Add Librarian</h2>
 
-<form asp-action="Create" method="post" onsubmit="return validateForm();">
-    <div class="mb-3">
-        <label>Name</label>
-        <input asp-for="Name" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label>Age</label>
-        <input asp-for="Age" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label>Phone</label>
-        <input asp-for="Phone" class="form-control" />
-    </div>
-    <button type="submit" class="btn btn-success">Add</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+<div class="container mt-4">
+    <h2>Add New Librarian</h2>
 
-<script>
-    function validateForm() {
-        const name = document.querySelector('[name="Name"]').value.trim();
-        const age = document.querySelector('[name="Age"]').value.trim();
-        const phone = document.querySelector('[name="Phone"]').value.trim();
-
-        if (!name || !age || !phone) {
-            alert("All fields are required: Name, Age, Phone.");
-            return false; // prevent form submission
-        }
-
-        return true; // allow submission
+    @if (ViewBag.Error != null)
+    {
+            <div class="alert alert-danger">@ViewBag.Error</div>
     }
-</script>
 
+    <div class="card" style="max-width: 600px;">
+        <div class="card-body">
+            <form method="post" action="/Librarian/Create">
+                <div class="mb-3">
+                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" name="Name" class="form-control" placeholder="Enter librarian name" required>
+                </div>
 
+                <div class="mb-3">
+                    <label class="form-label">Age</label>
+                    <input type="number" name="Age" class="form-control" placeholder="Enter age">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Phone</label>
+                    <input type="text" name="Phone" class="form-control" placeholder="Enter phone number">
+                </div>
+
+                <hr>
+                <h5>Login Credentials</h5>
+
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="Username" class="form-control" placeholder="Leave empty to auto-generate from name">
+                    <small class="text-muted">If empty, username will be generated from the name</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="text" name="Password" class="form-control" placeholder="Leave empty for default: 123456">
+                    <small class="text-muted">If empty, default password will be: 123456</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Librarian</button>
+                <a href="/Librarian" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

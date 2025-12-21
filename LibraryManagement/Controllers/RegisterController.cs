@@ -26,11 +26,12 @@ namespace LibraryManagement.Controllers
                 return View(model);
             }
 
-            // Check if username or email already exists
             using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             con.Open();
 
-            var checkCmd = new SqlCommand("SELECT COUNT(*) FROM Users WHERE Username = @Username OR Email = @Email", con);
+            // Check if username or email already exists
+            var checkCmd = new SqlCommand(
+                "SELECT COUNT(*) FROM Users WHERE Username = @Username OR Email = @Email", con);
             checkCmd.Parameters.AddWithValue("@Username", model.Username);
             checkCmd.Parameters.AddWithValue("@Email", model.Email);
 
@@ -41,22 +42,68 @@ namespace LibraryManagement.Controllers
                 return View(model);
             }
 
-            // Insert new user
-            var insertCmd = new SqlCommand(
-                "INSERT INTO Users (Username, Email, Password, Role, FullName, Phone) VALUES (@Username, @Email, @Password, @Role, @FullName, @Phone)",
+            // ✅ SECURITY FIX:  Set status based on role
+            // Students → Auto-approved (can login immediately)
+            // Librarians → Pending (need admin approval)
+            string status = model.Role.ToLower() == "student" ? "Approved" : "Pending";
+
+            // Insert new user with status
+            var insertCmd = new SqlCommand(@"
+                INSERT INTO Users (Username, Email, Password, Role, Status, FullName, Phone, CreatedDate, IsActive) 
+                OUTPUT INSERTED.UserId
+                VALUES (@Username, @Email, @Password, @Role, @Status, @FullName, @Phone, GETDATE(), 1)",
                 con);
 
             insertCmd.Parameters.AddWithValue("@Username", model.Username);
             insertCmd.Parameters.AddWithValue("@Email", model.Email);
-            insertCmd.Parameters.AddWithValue("@Password", model.Password); // In real app, hash this!
+            insertCmd.Parameters.AddWithValue("@Password", model.Password); // TODO: Hash in production! 
             insertCmd.Parameters.AddWithValue("@Role", model.Role);
+            insertCmd.Parameters.AddWithValue("@Status", status);
             insertCmd.Parameters.AddWithValue("@FullName", model.FullName);
-            insertCmd.Parameters.AddWithValue("@Phone", model.Phone);
+            insertCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
 
-            insertCmd.ExecuteNonQuery();
+            // Get the newly created UserId
+            int newUserId = (int)insertCmd.ExecuteScalar();
 
-            TempData["Success"] = "Registration successful! Please login.";
+            // ✅ Also insert into respective role table (Students or Librarians)
+            if (model.Role.ToLower() == "student")
+            {
+                var studentCmd = new SqlCommand(@"
+                    INSERT INTO Students (StudentName, Email, Phone, UserId) 
+                    VALUES (@Name, @Email, @Phone, @UserId)", con);
+                studentCmd.Parameters.AddWithValue("@Name", model.FullName);
+                studentCmd.Parameters.AddWithValue("@Email", model.Email);
+                studentCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
+                studentCmd.Parameters.AddWithValue("@UserId", newUserId);
+                studentCmd.ExecuteNonQuery();
+            }
+            else if (model.Role.ToLower() == "librarian")
+            {
+                // Insert into Librarians table (will be active after approval)
+                var librarianCmd = new SqlCommand(@"
+                    INSERT INTO Librarians (Name, Phone, UserId) 
+                    VALUES (@Name, @Phone, @UserId)", con);
+                librarianCmd.Parameters.AddWithValue("@Name", model.FullName);
+                librarianCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
+                librarianCmd.Parameters.AddWithValue("@UserId", newUserId);
+                librarianCmd.ExecuteNonQuery();
+            }
+
+            // Different messages and redirects based on role
+            if (model.Role.ToLower() == "librarian")
+            {
+                TempData["Message"] = "Your librarian account is pending admin approval. You will be notified once approved.";
+                return RedirectToAction("PendingApproval");
+            }
+
+            TempData["Success"] = "Registration successful!  Please login.";
             return RedirectToAction("Index", "Login");
+        }
+
+        // Page shown to librarians after registration
+        public IActionResult PendingApproval()
+        {
+            return View();
         }
     }
 }

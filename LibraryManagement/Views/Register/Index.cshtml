@@ -1,108 +1,64 @@
 ﻿@model LibraryManagement.Models.RegisterModel
-
 @{
     Layout = null;
 }
-
-<!DOCTYPE html>
+<! DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #C9A88C;
-            min-height: 100vh;
-        }
-
-        .register-container {
-            margin-top: 50px;
-            max-width: 500px;
-            border: 1px solid #9C9C9C;
-            background-color: #EAEAEA;
-            padding: 30px;
-            border-radius: 10px;
-        }
-    </style>
+    <title>Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-
+<body style="background-color: #C9A88C; padding: 50px 0;">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="register-container">
-                    @if (ViewBag.Error != null)
-                    {
-                            <div class="alert alert-danger">@ViewBag.Error</div>
-                    }
+        <div style="background:  #EAEAEA; padding:  30px; border-radius: 5px; max-width: 500px; margin: auto;">
+            <h3 class="text-center text-info">Create New Account</h3>
 
-                    @using (Html.BeginForm("Index", "Register", FormMethod.Post))
-                    {
-                            <h3 class="text-center text-info mb-4">Register New Account</h3>
-
-                            <div class="form-group">
-                                <label class="text-info">Role:</label>
-                            @Html.DropDownListFor(m => m.Role, new SelectList(new[] {
-                                new { Value = "Student", Text = "Student" },
-                                new { Value = "Librarian", Text = "Librarian" }
-                            }, "Value", "Text"), "Select Role", new { @class = "form-control", @required = true })
-                            @Html.ValidationMessageFor(m => m.Role, "", new { @class = "text-danger" })
-                            </div>
-
-                            <div class="form-group">
-                                <label class="text-info">Username:</label>
-                            @Html.TextBoxFor(m => m.Username, new { @class = "form-control", @placeholder = "Username", @required = true })
-                            @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
-                            </div>
-
-                            <div class="form-group">
-                                <label class="text-info">Email:</label>
-                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", @placeholder = "Email", @type = "email", @required = true })
-                            @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
-                            </div>
-
-                            <div class="form-group">
-                                <label class="text-info">Full Name:</label>
-                            @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", @placeholder = "Full Name", @required = true })
-                            @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
-                            </div>
-
-                            <div class="form-group">
-                                <label class="text-info">Phone:</label>
-                            @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", @placeholder = "Phone Number", @required = true })
-                            @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger" })
-                            </div>
-
-                            <div class="form-group">
-                                <label class="text-info">Password:</label>
-                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", @placeholder = "Password", @required = true })
-                            @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-                            </div>
-
-                            <div class="form-group">
-                                <label class="text-info">Confirm Password:</label>
-                            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", @placeholder = "Confirm Password", @required = true })
-                            @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
-                            </div>
-
-                            <div class="form-group">
-                                <input type="submit" class="btn btn-success btn-md w-100" value="Register">
-                            </div>
-                    }
-
-                    <hr>
-                    <div class="text-center">
-                        <a href="/Login" class="btn btn-outline-info">Back to Login</a>
-                    </div>
+            <form method="post" action="/Register/Index">
+                <div class="mb-3">
+                    <label>Register as:</label>
+                    <select name="Role" class="form-control" required>
+                        <option value="">-- Select --</option>
+                        <option value="Student">Student</option>
+                        <option value="Librarian">Librarian</option>
+                    </select>
                 </div>
-            </div>
+
+                <div class="mb-3">
+                    <label>Full Name:</label>
+                    <input type="text" name="FullName" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Username:</label>
+                    <input type="text" name="Username" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Email:</label>
+                    <input type="email" name="Email" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Phone:</label>
+                    <input type="text" name="Phone" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Password:</label>
+                    <input type="password" name="Password" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Confirm Password:</label>
+                    <input type="password" name="ConfirmPassword" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-info w-100">Register</button>
+            </form>
+
+            <hr>
+            <p class="text-center">Already have an account? <a href="/Login">Login here</a></p>
         </div>
     </div>
-
 </body>
 </html>
-

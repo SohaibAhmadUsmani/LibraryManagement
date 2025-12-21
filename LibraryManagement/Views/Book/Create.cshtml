@@ -1,32 +1,42 @@
 ﻿@model LibraryManagement.Models.BookModel
 @{
-    ViewData["Title"] = "Add Book";
+    ViewData["Title"] = "Add New Book";
 }
-<h2>Add Book</h2>
 
-<form asp-action="Create" method="post" onsubmit="return validateForm();">
-    <div class="mb-3">
-        <label>BookName</label>
-        <input asp-for="BookName" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label>Author</label>
-        <input asp-for="Author" class="form-control" />
-    </div>
-    <button type="submit" class="btn btn-success">Add</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+<div class="container mt-4">
+    <h2>Add New Book</h2>
 
-<script>
-    function validateForm() {
-        const bookname = document.querySelector('[name="BookName"]').value.trim();
-        const author = document.querySelector('[name="Author"]').value.trim();
-
-        if (!bookname || !author) {
-            alert("All fields are required: BookName, Author.");
-            return false; // prevent form submission
-        }
-
-        return true; // allow submission
+    @if(ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
     }
-</script>
+
+    <div class="card" style="max-width: 600px;">
+        <div class="card-body">
+            <form method="post" action="/Book/Create">
+                <div class="mb-3">
+                    <label class="form-label">Book Name</label>
+                    <input type="text" name="BookName" class="form-control" placeholder="Enter book name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Author</label>
+                    <input type="text" name="Author" class="form-control" placeholder="Enter author name">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Publisher</label>
+                    <input type="text" name="Publisher" class="form-control" placeholder="Enter publisher name">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" name="Quantity" class="form-control" placeholder="Enter quantity" value="1" min="1">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Add Book</button>
+                <a href="/Book" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,33 +1,101 @@
-﻿@model List<LibraryManagement.Models.BorrowingModel>
+﻿@model List<LibraryManagement.Models.BorrowRequestModel>
 @{
-    ViewData["Title"] = "Borrowing List";
+    ViewData["Title"] = "All Borrowings";
 }
+<div class="container mt-4">
+    <h2>All Borrowings</h2>
+    <div class="card">
+        <div class="card-body">
+            @if(Model!= null&&Model.Count>0)
+            {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Student</th>
+                                <th>Book</th>
+                                <th>Request Date</th>
+                                <th>Approved</th>
+                                <th>Due Date</th>
+                                <th>Returned</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @for (int i=0;i<Model.Count;i++)
+                        {
+                            var id=Model[i].RequestId;
+                            var student=Model[i].StudentName;
+                            var book=Model[i].BookName;
+                            var reqDate=Model[i].RequestDate;
+                            var appDate=Model[i].ApprovedDate;
+                            var dueDate=Model[i].DueDate;
+                            var retDate=Model[i].ReturnedDate;
+                            var status=Model[i].Status;
+                                    <tr>
+                                        <td>@id</td>
+                                        <td>@student</td>
+                                        <td>@book</td>
+                                        <td>@reqDate.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                    @if (appDate.HasValue)
+                                    {
+                                        @appDate.Value.ToString("MMM dd, yyyy")
+                                                    }
+                                    else
+                                    {
+                                    <span class="text-muted">-</span>
+                                    }
+                                        </td>
+                                        <td>
+                                    @if (dueDate.HasValue)
+                                    {
+                                        @dueDate.Value.ToString("MMM dd, yyyy")
+                                                    }
+                                    else
+                                    {
+                                                    <span class="text-muted">-</span>
+                                    }
+                                        </td>
+                                        <td>
+                                    @if (retDate.HasValue)
+                                    {
+                                        @retDate.Value.ToString("MMM dd, yyyy")
+                                                    }
+                                    else
+                                    {
+                                      <span class="text-muted">-</span>
+                                    }
+                                        </td>
+                                        <td>
+                                    @if(status=="Pending")
+                                    {
+                                      <span class="badge bg-warning text-dark">Pending</span>
+                                    }
+                                    else if (status == "Approved")
+                                    {
+                                    <span class="badge bg-success">Active</span>
+                                    }
+                                    else if (status == "Returned")
+                                    {
+                                     <span class="badge bg-info">Returned</span>
+                                    }
+                                    else if (status == "Rejected")
+                                    {
+                                   <span class="badge bg-secondary">Rejected</span>
+                                    }
+                                        </td>
+                                    </tr>
+                        }
+                        </tbody>
+                    </table>
+            }
+            else
+            {
+                    <p class="text-muted text-center">No borrowings found.</p>
+            }
+        </div>
+    </div>
 
-<a class="btn btn-primary mt-3 ms-2" href="/Borrowing/Create">Add New Borrowing</a>
-
-<table class="table table-bordered mt-3">
-    <tr>
-        <th>BorrowingID</th>
-        <th>StudentName</th>
-        <th>BookName</th>
-        <th>BorrowDate</th>
-        <th>ReturnedDate</th>
-        <th>Actions</th>
-    </tr>
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>@item.BorrowingId</td>
-            <td>@item.StudentName</td>
-            <td>@item.BookName</td>
-            <td>@item.BorrowDate.ToShortDateString()</td>
-            <td>@item.ReturnedDate.ToShortDateString()</td>
-            <td>
-                <a href="/Borrowing/Edit/@item.BorrowingId" class="btn btn-warning btn-sm">Edit</a>
-                <a href="/Borrowing/Delete/@item.BorrowingId" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
-            </td>
-        </tr>
-    }
-</table>
-
-
+    <a href="/Dashboard"class="btn btn-secondary mt-3">Back to Dashboard</a>
+</div>

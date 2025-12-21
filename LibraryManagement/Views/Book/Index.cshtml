@@ -1,31 +1,74 @@
 ﻿@model List<LibraryManagement.Models.BookModel>
-
 @{
-    ViewData["Title"] = "Books";
+	ViewBag.Title = "Manage Books";
 }
+<div class="container mt-4">
+	<h2>Manage Books</h2>
+	@if(TempData["Success"] != null)
+	{
+		<div class="alert alert-success">@TempData["Success"]</div>
+	}	
+	@if (TempData["Error"] != null)
+	{
+		<div class="alert alert-danger">@TempData["Error"]</div>
+	}	
+	<a href="/Book/Create" class="btn btn-primary mb-3">Add New Book</a>"
+	<div class="card">
+		<div class="card-header">
+			<h5>All Books</h5>
+		</div>
+	</div class="card-body">
+	@if(Model !=null && Model.Count>0)
+	{
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Book ID</th>
+					<th>Book Name</th>
+					<th>Author</th>
+					<th>Publisher</th>
+					<th>Qty</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach(var book in Model)
+				{
+					<tr>
+						<td>@book.BookId</td>
+						<td>@book.BookName</td>
+						<td>@book.Author</td>
+						<td>@book.Publisher</td>
+						<td>@book.Quantity</td>
+								<td>
+							@if (book.Quantity > 0)
+							{
+											<span class="badge bg-success">Available</span>
+							}
+							else
+							{
+											<span class="badge bg-danger">Out of Stock</span>
+							}
+							</td>
+									<td>
+		<a href="/Book/Edit/@book.BookId"class="btn btn-sm btn-warning">Edit</a>
+		<a href="/Book/Delete/@book.BookId" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>"
+					</td>
+	</tr>
+				}
+						</tbody>
+					</table>
+					}
+	else
+	{
+		<p class="text-muted text-center">No books found. </p>
+	}
+		</div>
+	</div>
+</div>
 
-<a class="btn btn-primary mt-3 ms-2" href="/Book/Create">Add New Book</a>
+			</tbody>
+		</table>
+	}
 
-<table class="table table-bordered mt-3">
-    <thead>
-        <tr>
-            <th>BookID</th> <!-- Add this line -->
-            <th>BookName</th>
-            <th>Author</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.BookId</td> <!-- Add this line -->
-                <td>@item.BookName</td>
-                <td>@item.Author</td>
-                <td>
-                    <a class="btn btn-warning btn-sm" href="/Book/Edit/@item.BookId">Edit</a>
-                    <a class="btn btn-danger btn-sm" href="/Book/Delete/@item.BookId" onclick="return confirm('Are you sure?')">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>

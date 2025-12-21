@@ -1,35 +1,53 @@
 ﻿@model List<LibraryManagement.Models.LibrarianModel>
-
 @{
     ViewData["Title"] = "Librarians";
 }
 
-<a class="btn btn-primary mt-3 ms-2" href="/Librarian/Create">Add New Librarian</a>
+<div class="container mt-4">
+    <h2>Manage Librarians</h2>
 
-<table class="table table-bordered mt-3">
-    <thead>
-        <tr>
-            <th>LibrarianID</th> <!-- Add this line -->
-            <th>Name</th>
-            <th>Age</th>
-            <th>Phone</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.LibrarianId</td> <!-- Add this line -->
-                <td>@item.Name</td>
-                <td>@item.Age</td>
-                <td>@item.Phone</td>
-                <td>
-                    <a class="btn btn-warning btn-sm" href="/Librarian/Edit/@item.LibrarianId">Edit</a>
-                    <a class="btn btn-danger btn-sm" href="/Librarian/Delete/@item.LibrarianId" onclick="return confirm('Are you sure?')">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    @if (TempData["Success"] != null)
+    {
+            <div class="alert alert-success">@TempData["Success"]</div>
+    }
 
+    <a href="/Librarian/Create" class="btn btn-primary mb-3">Add New Librarian</a>
 
+    <div class="card">
+        <div class="card-body">
+            @if (Model != null && Model.Count > 0)
+            {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model)
+                        {
+                                    <tr>
+                                        <td>@item.LibrarianId</td>
+                                        <td>@item.Name</td>
+                                        <td>@item.Age</td>
+                                        <td>@item.Phone</td>
+                                        <td>
+                                            <a href="/Librarian/Edit/@item. LibrarianId" class="btn btn-sm btn-warning">Edit</a>
+                                            <a href="/Librarian/Delete/@item.LibrarianId" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure? ')">Delete</a>
+                                        </td>
+                                    </tr>
+                        }
+                        </tbody>
+                    </table>
+            }
+            else
+            {
+                    <p class="text-muted text-center">No librarians found.</p>
+            }
+        </div>
+    </div>
+</div>

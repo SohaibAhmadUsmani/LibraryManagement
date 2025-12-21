@@ -1,38 +1,52 @@
 ﻿@model LibraryManagement.Models.StudentModel
 @{
-    ViewData["Title"] = "Add Student";
+    ViewData["Title"] = "Add New Student";
 }
-<h2>Add Student</h2>
 
-<form asp-action="Create" method="post" onsubmit="return validateForm();">
-    <div class="mb-3">
-        <label>StudentName</label>
-        <input asp-for="StudentName" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label>Email</label>
-        <input asp-for="Email" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label>Phone</label>
-        <input asp-for="Phone" class="form-control" />
-    </div>
-    <button type="submit" class="btn btn-success">Add</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
-
-<script>
-    function validateForm(){
-        const studentname = document.querySelector('[name="StudentName"]').value.trim();
-        const email = document.querySelector('[name="Email"]').value.trim();
-        const phone = document.querySelector('[name="Phone"]').value.trim();
-
-        if (!studentname || !email || !phone) {
-            alert("All fields are required: StudentName, Email, and Phone.");
-            return false; // prevent form submission
-        }
-
-        return true; //aloww submission
+<div class="container mt-4">
+    <h2>Add New Student</h2>
+    
+    @if(ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">@ViewBag.Error</div>
     }
-</script>
-
+    
+    <div class="card" style="max-width: 600px;">
+        <div class="card-body">
+            <form method="post" action="/Student/Create">
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="StudentName" class="form-control" placeholder="Enter student name" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="Email" class="form-control" placeholder="Enter email" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Phone</label>
+                    <input type="text" name="Phone" class="form-control" placeholder="Enter phone number">
+                </div>
+                
+                <hr>
+                <h5>Login Credentials</h5>
+                
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="Username" class="form-control" placeholder="Leave empty to auto generate">
+                    <small class="text-muted">If empty, username will be generated from email</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="text" name="Password" class="form-control" placeholder="Leave empty for default 123456">
+                    <small class="text-muted">Default password is 123456</small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Create Student</button>
+                <a href="/Student" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

@@ -33,22 +33,48 @@ namespace LibraryManagement.Controllers
             using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             con.Open();
 
-            var cmd = new SqlCommand("SELECT UserId, Username, Role, FullName FROM Users WHERE Username = @Username AND Password = @Password AND IsActive = 1", con);
+            // ✅ Fetch Status along with other fields
+            var cmd = new SqlCommand(@"
+                SELECT UserId, Username, Role, FullName, Status, IsActive 
+                FROM Users 
+                WHERE Username = @Username AND Password = @Password", con);
             cmd.Parameters.AddWithValue("@Username", usr.username);
             cmd.Parameters.AddWithValue("@Password", usr.password);
 
             using var reader = cmd.ExecuteReader();
             if (reader.Read())
             {
-                // Store user info in session
-                HttpContext.Session.SetInt32("UserId", (int)reader["UserId"]);
-                HttpContext.Session.SetString("Username", reader["Username"].ToString() ?? "");
-                HttpContext.Session.SetString("Role", reader["Role"].ToString() ?? "");
-                HttpContext.Session.SetString("FullName", reader["FullName"].ToString() ?? "");
-
+                bool isActive = (bool)reader["IsActive"];
+                string status = reader["Status"]?.ToString() ?? "Pending";
                 string role = reader["Role"].ToString() ?? "";
 
-                TempData["message"] = "Login Success";
+                // ✅ Check if account is active
+                if (!isActive)
+                {
+                    ViewBag.message = "Your account has been deactivated. Please contact administrator.";
+                    return View("Index");
+                }
+
+                // ✅ CHECK STATUS - This prevents unapproved librarians from logging in! 
+                if (status == "Pending")
+                {
+                    ViewBag.message = "⏳ Your account is pending admin approval. Please wait for approval.";
+                    return View("Index");
+                }
+
+                if (status == "Rejected")
+                {
+                    ViewBag.message = "❌ Your account request was rejected. Please contact administrator.";
+                    return View("Index");
+                }
+
+                // ✅ Status is "Approved" - Allow login
+                HttpContext.Session.SetInt32("UserId", (int)reader["UserId"]);
+                HttpContext.Session.SetString("Username", reader["Username"].ToString() ?? "");
+                HttpContext.Session.SetString("Role", role);
+                HttpContext.Session.SetString("FullName", reader["FullName"].ToString() ?? "");
+
+                TempData["message"] = "Login Success!  Welcome " + reader["FullName"].ToString();
 
                 // Redirect based on role
                 return role.ToLower() switch
@@ -61,7 +87,7 @@ namespace LibraryManagement.Controllers
             }
             else
             {
-                ViewBag.message = "Invalid username or password!";
+                ViewBag.message = "Invalid username or password! ";
                 return View("Index");
             }
         }
@@ -69,6 +95,7 @@ namespace LibraryManagement.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
+            TempData["message"] = "You have been logged out successfully.";
             return RedirectToAction("Index", "Login");
         }
     }

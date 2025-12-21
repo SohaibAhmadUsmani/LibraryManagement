@@ -1,36 +1,53 @@
-﻿@model List<LibraryManagement.Models.StudentModel>
-
+﻿@model List<LibraryManagement. Models.StudentModel>
 @{
     ViewData["Title"] = "Students";
 }
 
-<a class="btn btn-primary mt-3 ms-2" href="/Student/Create">Add New Student</a>
+<div class="container mt-4">
+    <h2>Manage Students</h2>
 
-<table class="table table-bordered mt-3">
-    <thead>
-        <tr>
-            <th>StudentID</th> <!-- Add this line -->
-            <th>StudentName</th>
-            <th>Email</th>
-            <th>Phone</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.StudentId</td> <!-- Add this line -->
-                <td>@item.StudentName</td>
-                <td>@item.Email</td>
-                <td>@item.Phone</td>
-                <td>
-                    <a class="btn btn-warning btn-sm" href="/Student/Edit/@item.StudentId">Edit</a>
-                    <a class="btn btn-danger btn-sm" href="/Student/Delete/@item.StudentId" onclick="return confirm('Are you sure?')">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    @if (TempData["Success"] != null)
+    {
+            <div class="alert alert-success">@TempData["Success"]</div>
+    }
 
+    <a href="/Student/Create" class="btn btn-primary mb-3">Add New Student</a>
 
-
+    <div class="card">
+        <div class="card-body">
+            @if (Model != null && Model.Count > 0)
+            {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model)
+                        {
+                                    <tr>
+                                        <td>@item.StudentId</td>
+                                        <td>@item. StudentName</td>
+                                        <td>@item.Email</td>
+                                        <td>@item.Phone</td>
+                                        <td>
+                                            <a href="/Student/Edit/@item. StudentId" class="btn btn-sm btn-warning">Edit</a>
+                                            <a href="/Student/Delete/@item.StudentId" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                                        </td>
+                                    </tr>
+                        }
+                        </tbody>
+                    </table>
+            }
+            else
+            {
+                    <p class="text-muted text-center">No students found.</p>
+            }
+        </div>
+    </div>
+</div>

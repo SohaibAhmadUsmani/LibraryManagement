@@ -1,0 +1,44 @@
+﻿@{
+    Layout = null;
+}
+
+<! DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color:  #C9A88C;
+            height: 100vh;
+        }
+        . pending-box {
+            max-width:  500px;
+            margin: 100px auto;
+            background-color: #EAEAEA;
+            padding: 40px;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="pending-box">
+            <h2 class="text-warning">Account Pending Approval</h2>
+            <hr>
+            <p>Your librarian account registration has been submitted successfully!</p>
+            <p class="text-muted">
+                An administrator will review your request and approve it shortly.
+                You will be able to login once your account is approved. 
+            </p>
+            <hr>
+            <a href="/Login" class="btn btn-info">Go to Login Page</a>
+        </div>
+    </div>
+
+</body>
+</html>

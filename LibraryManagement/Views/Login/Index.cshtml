@@ -4,13 +4,13 @@
     Layout = null;
 }
 
-<!DOCTYPE html>
+<! DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap. min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery. min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap. min.js"></script>
     <style>
         body {
             margin: 0;
@@ -19,61 +19,66 @@
             height: 100vh;
         }
 
-        #login .container #login-row #login-column #login-box {
+        .login-box {
             margin-top: 120px;
             max-width: 450px;
-            height: 400px;
             border: 1px solid #9C9C9C;
             background-color: #EAEAEA;
-        }
-
-        #login .container #login-row #login-column #login-box #login-form {
-            padding: 20px;
+            padding: 30px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
 
-    <div id="login">
-        <div class="container">
-            <div id="login-row" class="row justify-content-center align-items-center">
-                <div id="login-column" class="col-md-6">
-                    <div id="login-box" class="col-md-12">
-                        @if (TempData["Success"] != null)
-                        {
-                                <div class="alert alert-success">@TempData["Success"]</div>
-                        }
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="login-box">
 
-                        @using (Html.BeginForm("Verify", "Login", FormMethod.Post))
-                        {
-                                <h3 class="text-center text-info">Library Management Login</h3>
-                                <div class="form-group">
-                                    <label for="username" class="text-info">Username:</label><br>
-                                @Html.TextBoxFor(m => m.username, new { @class = "form-control", @placeholder = "Username", @required = true })
-                                @Html.ValidationMessageFor(m => m.username, "", new { @class = "text-danger" })
-                                </div>
-                                <div class="form-group">
-                                    <label for="password" class="text-info">Password:</label><br>
-                                @Html.PasswordFor(m => m.password, new { @class = "form-control", @placeholder = "Password", @required = true })
-                                @Html.ValidationMessageFor(m => m.password, "", new { @class = "text-danger" })
-                                </div>
-                                <div class="form-group">
-                                    <input type="Submit" name="Submit" class="btn btn-info btn-md w-100" value="Login">
-                                </div>
-                        }
-                        <div style="color:red;">@ViewBag.message</div>
+                    @if (TempData["Success"] != null)
+                    {
+                            <div class="alert alert-success">@TempData["Success"]</div>
+                    }
 
-                        <hr>
-                        <div class="text-center">
-                            <p class="text-info">Don't have an account?</p>
-                            <a href="/Register" class="btn btn-outline-primary">Register as Student</a>
-                            <a href="/Register" class="btn btn-outline-success">Register as Librarian</a>
+                    @if (TempData["message"] != null)
+                    {
+                            <div class="alert alert-info">@TempData["message"]</div>
+                    }
+
+                    <h3 class="text-center text-info">Library Management Login</h3>
+
+                    <form asp-controller="Login" asp-action="Verify" method="post">
+
+                        <div class="form-group">
+                            <label class="text-info">Username:</label>
+                            <input asp-for="username" class="form-control" placeholder="Username" required />
+                            <span asp-validation-for="username" class="text-danger"></span>
                         </div>
 
-                        <div class="mt-3">
-                            <small class="text-muted">Test Admin: admin/123</small>
+                        <div class="form-group">
+                            <label class="text-info">Password:</label>
+                            <input asp-for="password" type="password" class="form-control" placeholder="Password" required />
+                            <span asp-validation-for="password" class="text-danger"></span>
                         </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-info btn-md w-100">Login</button>
+                        </div>
+                    </form>
+
+                    @if (ViewBag.message != null)
+                    {
+                            <div class="alert alert-danger">@ViewBag.message</div>
+                    }
+
+                    <hr>
+
+                    <div class="text-center">
+                        <p class="text-info">Don't have an account? </p>
+                        <a href="/Register" class="btn btn-primary w-100">Click here to Register</a>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -81,4 +86,3 @@
 
 </body>
 </html>
-
