@@ -36,11 +36,11 @@
                                         <td>@id</td>
                                         <td>@student</td>
                                         <td>@book</td>
-                                        <td>@reqDate.ToString("MMM dd, yyyy")</td>
+                                        <td>@reqDate.ToString("MMM, dd, yyyy")</td>
                                         <td>
                                     @if (appDate.HasValue)
                                     {
-                                        @appDate.Value.ToString("MMM dd, yyyy")
+                                        @appDate.Value.ToString("MMM ,dd, yyyy")
                                                     }
                                     else
                                     {

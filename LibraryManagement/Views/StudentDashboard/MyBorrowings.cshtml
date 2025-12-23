@@ -1,73 +1,70 @@
 ﻿@model List<LibraryManagement.Models.BorrowRequestModel>
 @{
-	ViewData["Title"] = "My Borrowings";
+    ViewData["Title"] = "My Borrowings";
 }
 <div class="container mt-4">
-	<h2>My Borrowings</h2>
-	@if (TempData["Success"] != null)
-	{
-		<div class="alert alert-success">@TempData["Success"]</div>
-	}
-	@if(TempData["Error"]!=null)
-	{
-		<div class="alert alert-danger">@TempData["Error"]</div>
-	}
-	<div class="card">
-		<div class="card-body">
-			@if (Model != null && Model.Count > 0)
-			{
-				<table class="table table-striped">
-					<thead>
-						<tr>
-							<th>ID</th>
-							<th>Book</th>
-							<th>Date</th>
-							<th>Status</th>
-							<th>Due</th>
-							<th>Action</th>
-						</tr>
-					</thead>
-					<tbody>
-						@for(int i=0;i<Model.Count;i++)
-						{
-							var reqId = Model[i].RequestId;
-							var bookName = Model[i].BookName;
-							var reqDate = Model[i].RequestDate;
-							var status = Model[i].Status;
-							var dueDate = Model[i].DueDate;
-							<tr>
-								<td>@reqId</td>
-								<td>@bookName</td>
-								<td>@reqDate.ToString("MMM dd")</td>
-								<td>@status</td>
-								<td>
-									@if (dueDate.HasValue)
-									{
-										@dueDate.Value.ToString("MMM dd")
-									}
-								</td>
-								<td>
-									@if (status == "Approved")
-									{
-										<form method="post" action="/StudentDashboard/ReturnBook">
-											<input type="hidden" name="requestId" value="@reqId" />
-											<button type="submit" class="btn btn-sm btn-primary">Return</button>
-										</form>
-									}
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			}
-			else
-			{
-				<p>No borrowings found.</p>
-			}	
-			</<div>
-							
-			</div>
-			<a href="/StudentDashboard" class="btn btn-secondary mt-3">Back</a>
-				</div>			
-							
-						
+    <h2>My Borrowings</h2>
+    @if (TempData["Success"] != null)
+    {
+            <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+            <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    <div class="card">
+        <div class="card-body">
+            @if (Model != null && Model.Count > 0)
+            {
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Book</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Due</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var reqId = Model[i].RequestId;
+                            var bookName = Model[i].BookName;
+                            var reqDate = Model[i].RequestDate;
+                            var status = Model[i].Status;
+                            var dueDate = Model[i].DueDate;
+                                    <tr>
+                                        <td>@reqId</td>
+                                        <td>@bookName</td>
+                                        <td>@reqDate.ToString("MMM dd")</td>
+                                        <td>@status</td>
+                                        <td>
+                                    @if (dueDate.HasValue)
+                                    {
+                                        @dueDate.Value.ToString("MMM dd")
+                                    }
+                                        </td>
+                                        <td>
+                                    @if (status == "Approved")
+                                    {
+                                                    <form method="post" action="/StudentDashboard/ReturnBook">
+                                                        <input type="hidden" name="requestId" value="@reqId" />
+                                                        <button type="submit" class="btn btn-sm btn-primary">Return</button>
+                                                    </form>
+                                    }
+                                        </td>
+                                    </tr>
+                        }
+                        </tbody>
+                    </table>
+            }
+            else
+            {
+                    <p>No borrowings found.</p>
+            }
+        </div>
+    </div>
+    <a href="/StudentDashboard" class="btn btn-secondary mt-3">Back</a>
+</div>

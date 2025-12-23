@@ -1,64 +1,140 @@
 ﻿@model LibraryManagement.Models.RegisterModel
 @{
+    ViewData["Title"] = "Register";
     Layout = null;
 }
-<! DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Register</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+    <style>
+        .register-background {
+            min-height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 0;
+            background: url('/images/register.jpg') no-repeat center center/cover;
+        }
+        .overlay {
+            position: absolute;
+            top:0; left:0; right:0; bottom:0;
+            background: rgba(0,0,0,0.55);
+            z-index: 1;
+        }
+        .center-form-container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            width: 100vw;
+        }
+        .form-card {
+            background: rgba(255,255,255,0.98);
+            padding: 0.7rem 0.5rem 0.5rem 0.5rem;
+            max-width: 310px;
+            width: 100%;
+            max-height: 97vh;
+            overflow-y: auto;
+            border-radius: 0.8rem;
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.13);
+            transition: transform 0.19s cubic-bezier(.4,2,.6,1.2), box-shadow 0.19s;
+            will-change: transform, box-shadow;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        .form-card:hover, .form-card:focus-within {
+            transform: scale(1.03);
+            box-shadow: 0 11px 32px rgba(0,0,0,0.18);
+        }
+        .form-card .form-label {
+            font-size: 0.93rem;
+            margin-bottom: 2px;
+        }
+        .form-card input.form-control,
+        .form-card select.form-control {
+            font-size: 0.93rem;
+            padding: 2px 7px;
+            height: 1.5rem;
+            margin-bottom: 4px;
+            border-radius: 0.3rem;
+        }
+        .form-card button {
+            font-size: 0.97rem;
+            padding: 0.36rem 0;
+            min-height: 2rem;
+        }
+        .form-card .mb-2,
+        .form-card .mb-3 {
+            margin-bottom: 0.55rem !important;
+        }
+    </style>
 </head>
-<body style="background-color: #C9A88C; padding: 50px 0;">
-    <div class="container">
-        <div style="background:  #EAEAEA; padding:  30px; border-radius: 5px; max-width: 500px; margin: auto;">
-            <h3 class="text-center text-info">Create New Account</h3>
-
-            <form method="post" action="/Register/Index">
-                <div class="mb-3">
-                    <label>Register as:</label>
-                    <select name="Role" class="form-control" required>
-                        <option value="">-- Select --</option>
-                        <option value="Student">Student</option>
-                        <option value="Librarian">Librarian</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label>Full Name:</label>
-                    <input type="text" name="FullName" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Username:</label>
-                    <input type="text" name="Username" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Email:</label>
-                    <input type="email" name="Email" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Phone:</label>
-                    <input type="text" name="Phone" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Password:</label>
-                    <input type="password" name="Password" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label>Confirm Password:</label>
-                    <input type="password" name="ConfirmPassword" class="form-control" required>
-                </div>
-
-                <button type="submit" class="btn btn-info w-100">Register</button>
-            </form>
-
-            <hr>
-            <p class="text-center">Already have an account? <a href="/Login">Login here</a></p>
+<body>
+    <div class="register-background">
+        <div class="overlay"></div>
+        <div class="center-form-container">
+            <div class="form-card">
+                <h3 class="mb-3 text-center">Register</h3>
+                @if (ViewBag.Error != null)
+                {
+                        <div class="alert alert-danger text-center">@ViewBag.Error</div>
+                }
+                <form asp-action="Index" method="post">
+                    <div class="mb-2">
+                        <label asp-for="Username" class="form-label"></label>
+                        <input asp-for="Username" class="form-control" autocomplete="username"/>
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="email" type="email"/>
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" type="password" autocomplete="new-password"/>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="ConfirmPassword" class="form-label"></label>
+                        <input asp-for="ConfirmPassword" class="form-control" type="password" autocomplete="new-password"/>
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control"/>
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control"/>
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Role" class="form-label"></label>
+                        <select asp-for="Role" class="form-control">
+                            <option value="">-- Select Role --</option>
+                            <option value="Student">Student</option>
+                            <option value="Librarian">Librarian</option>
+                        </select>
+                        <span asp-validation-for="Role" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block w-100">Register</button>
+                    <div class="text-center mt-3">
+                        <span>Already have an account?</span>
+                        <a href="/Login" class="btn btn-link p-0 align-baseline">Back to Login</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
+    <partial name="_ValidationScriptsPartial" />
 </body>
 </html>
