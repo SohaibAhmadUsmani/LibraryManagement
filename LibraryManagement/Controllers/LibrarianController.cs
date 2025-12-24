@@ -20,7 +20,7 @@ namespace LibraryManagement.Controllers
             using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             con.Open();
 
-            // Get librarians from Users table - use UserId as LibrarianId if LibrarianId is 0
+            // Get librarians from Users table 
             using var cmd = new SqlCommand(@"
                 SELECT u.UserId, u.FullName, u.Email, u.Phone, u. Status, u.CreatedDate,
                        ISNULL(l.LibrarianId, u.UserId) as LibrarianId, ISNULL(l.Age, 0) as Age
@@ -123,7 +123,7 @@ namespace LibraryManagement.Controllers
             using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             con.Open();
 
-            // Try to get from Librarians table first
+           
             var cmd = new SqlCommand(@"
                 SELECT l.LibrarianId, l.Name, l.Age, l.Phone 
                 FROM Librarians l 

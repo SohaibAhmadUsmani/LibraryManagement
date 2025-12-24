@@ -1,4 +1,6 @@
-﻿namespace LibraryManagement.Models
+﻿using LibraryManagement.Models.Entities;
+
+namespace LibraryManagement.Models
 {
     public class LibrarianDashboardModel
     {

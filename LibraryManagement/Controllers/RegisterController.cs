@@ -42,12 +42,10 @@ namespace LibraryManagement.Controllers
                 return View(model);
             }
 
-            // ✅ SECURITY FIX:  Set status based on role
-            // Students → Auto-approved (can login immediately)
-            // Librarians → Pending (need admin approval)
+            
             string status = model.Role.ToLower() == "student" ? "Approved" : "Pending";
 
-            // Insert new user with status
+            // Insert new user 
             var insertCmd = new SqlCommand(@"
                 INSERT INTO Users (Username, Email, Password, Role, Status, FullName, Phone, CreatedDate, IsActive) 
                 OUTPUT INSERTED.UserId
@@ -56,7 +54,7 @@ namespace LibraryManagement.Controllers
 
             insertCmd.Parameters.AddWithValue("@Username", model.Username);
             insertCmd.Parameters.AddWithValue("@Email", model.Email);
-            insertCmd.Parameters.AddWithValue("@Password", model.Password); // TODO: Hash in production! 
+            insertCmd.Parameters.AddWithValue("@Password", model.Password); 
             insertCmd.Parameters.AddWithValue("@Role", model.Role);
             insertCmd.Parameters.AddWithValue("@Status", status);
             insertCmd.Parameters.AddWithValue("@FullName", model.FullName);
@@ -65,12 +63,12 @@ namespace LibraryManagement.Controllers
             // Get the newly created UserId
             int newUserId = (int)insertCmd.ExecuteScalar();
 
-            // ✅ Also insert into respective role table (Students or Librarians)
+   
             if (model.Role.ToLower() == "student")
             {
                 var studentCmd = new SqlCommand(@"
-                    INSERT INTO Students (StudentName, Email, Phone, UserId) 
-                    VALUES (@Name, @Email, @Phone, @UserId)", con);
+                INSERT INTO Students (StudentName, Email, Phone, UserId) 
+                lVALUES (@Name, @Email, @Phone, @UserId)", con);
                 studentCmd.Parameters.AddWithValue("@Name", model.FullName);
                 studentCmd.Parameters.AddWithValue("@Email", model.Email);
                 studentCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
@@ -79,17 +77,17 @@ namespace LibraryManagement.Controllers
             }
             else if (model.Role.ToLower() == "librarian")
             {
-                // Insert into Librarians table (will be active after approval)
+                // Insert into Librarians table 
                 var librarianCmd = new SqlCommand(@"
                     INSERT INTO Librarians (Name, Phone, UserId) 
                     VALUES (@Name, @Phone, @UserId)", con);
-                librarianCmd.Parameters.AddWithValue("@Name", model.FullName);
-                librarianCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
-                librarianCmd.Parameters.AddWithValue("@UserId", newUserId);
-                librarianCmd.ExecuteNonQuery();
+                    librarianCmd.Parameters.AddWithValue("@Name", model.FullName);
+                     librarianCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
+                    librarianCmd.Parameters.AddWithValue("@UserId", newUserId);
+                    librarianCmd.ExecuteNonQuery();
             }
 
-            // Different messages and redirects based on role
+        
             if (model.Role.ToLower() == "librarian")
             {
                 TempData["Message"] = "Your librarian account is pending admin approval. You will be notified once approved.";
@@ -99,9 +97,7 @@ namespace LibraryManagement.Controllers
             TempData["Success"] = "Registration successful!  Please login.";
             return RedirectToAction("Index", "Login");
         }
-
-        // Page shown to librarians after registration
-        public IActionResult PendingApproval()
+            public IActionResult PendingApproval()
         {
             return View();
         }

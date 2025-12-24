@@ -1,4 +1,5 @@
-﻿@model List<LibraryManagement. Models.UserModel>
+﻿@using LibraryManagement.Models.Entities
+@model List<UserModel>
 @{
     ViewData["Title"] = "Pending Approvals";
 }
@@ -59,11 +60,11 @@
                         {
                                     <tr>
                                         <td>@index</td>
-                                        <td><strong>@user. FullName</strong></td>
+                                        <td><strong>@user.FullName</strong></td>
                                         <td>@user.Username</td>
                                         <td>@user.Email</td>
                                         <td>@user.Phone</td>
-                                        <td>@user. CreatedDate.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                        <td>@user.CreatedDate.ToString("MMM dd, yyyy hh:mm tt")</td>
                                         <td class="text-center">
                                             <form asp-controller="Admin" asp-action="ApproveUser" method="post" style="display: inline;">
                                                 <input type="hidden" name="userId" value="@user.UserId" />

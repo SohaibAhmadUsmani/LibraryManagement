@@ -1,23 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using LibraryManagement.Models;
+using LibraryManagement.Data;
+using Microsoft.EntityFrameworkCore; // Required for EF Core features
 
 namespace LibraryManagement.Controllers
 {
     public class AdminController : Controller
     {
-        private readonly IConfiguration _config;
+        private readonly LibraryContext _context;
 
-        public AdminController(IConfiguration config)
+        public AdminController(LibraryContext context)
         {
-            _config = config;
+            _context = context;
         }
 
-        // Helper:  Check if current user is Admin
+        // Helper: Check if current user is Admin (AccessLevel 3)
         private bool IsAdmin()
         {
-            var role = HttpContext.Session.GetString("Role");
-            return role?.ToLower() == "admin";
+            int? level = HttpContext.Session.GetInt32("AccessLevel");
+            return level != null && level == 3;
         }
 
         // View pending librarian approval requests
@@ -26,34 +27,14 @@ namespace LibraryManagement.Controllers
             if (!IsAdmin())
             {
                 TempData["Error"] = "Access denied. Admin only.";
-                return RedirectToAction("Index", "Login");
+                return RedirectToAction("Login", "Account");
             }
 
-            var pendingUsers = new List<UserModel>();
-
-            using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            con.Open();
-
-            var cmd = new SqlCommand(@"
-                SELECT UserId, Username, Email, FullName, Phone, Role, CreatedDate 
-                FROM Users 
-                WHERE Status = 'Pending' AND Role = 'Librarian'
-                ORDER BY CreatedDate DESC", con);
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                pendingUsers.Add(new UserModel
-                {
-                    UserId = (int)reader["UserId"],
-                    Username = reader["Username"].ToString() ?? "",
-                    Email = reader["Email"].ToString() ?? "",
-                    FullName = reader["FullName"].ToString() ?? "",
-                    Phone = reader["Phone"]?.ToString() ?? "",
-                    Role = reader["Role"].ToString() ?? "",
-                    CreatedDate = (DateTime)reader["CreatedDate"]
-                });
-            }
+            // EF Core Logic: Find Librarians (Level 2) who are "Pending"
+            var pendingUsers = _context.Users
+                .Where(u => u.Status == "Pending" && u.AccessLevel == 2)
+                .OrderByDescending(u => u.CreatedDate)
+                .ToList();
 
             ViewBag.PendingCount = pendingUsers.Count;
             return View(pendingUsers);
@@ -63,28 +44,17 @@ namespace LibraryManagement.Controllers
         [HttpPost]
         public IActionResult ApproveUser(int userId)
         {
-            if (!IsAdmin())
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            var user = _context.Users.Find(userId);
+            if (user != null && user.Status == "Pending")
             {
-                return RedirectToAction("Index", "Login");
-            }
+                user.Status = "Approved";
+                // We don't need ApprovedDate/ApprovedBy unless you add those fields to UserModel.
+                // If you really need them, let me know, otherwise this is fine.
 
-            int adminId = HttpContext.Session.GetInt32("UserId") ?? 0;
-
-            using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            con.Open();
-
-            var cmd = new SqlCommand(@"
-                UPDATE Users 
-                SET Status = 'Approved', ApprovedDate = GETDATE(), ApprovedBy = @AdminId 
-                WHERE UserId = @UserId AND Status = 'Pending'", con);
-            cmd.Parameters.AddWithValue("@UserId", userId);
-            cmd.Parameters.AddWithValue("@AdminId", adminId);
-
-            int rowsAffected = cmd.ExecuteNonQuery();
-
-            if (rowsAffected > 0)
-            {
-                TempData["Success"] = "✅ Librarian approved successfully!  They can now login.";
+                _context.SaveChanges(); // Updates database
+                TempData["Success"] = "✅ Librarian approved successfully!";
             }
             else
             {
@@ -98,25 +68,16 @@ namespace LibraryManagement.Controllers
         [HttpPost]
         public IActionResult RejectUser(int userId)
         {
-            if (!IsAdmin())
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            var user = _context.Users.Find(userId);
+            if (user != null)
             {
-                return RedirectToAction("Index", "Login");
-            }
+                user.Status = "Rejected";
+                user.IsActive = false;
 
-            using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            con.Open();
-
-            var cmd = new SqlCommand(@"
-                UPDATE Users 
-                SET Status = 'Rejected', IsActive = 0 
-                WHERE UserId = @UserId AND Status = 'Pending'", con);
-            cmd.Parameters.AddWithValue("@UserId", userId);
-
-            int rowsAffected = cmd.ExecuteNonQuery();
-
-            if (rowsAffected > 0)
-            {
-                TempData["Success"] = "❌ Librarian request rejected. ";
+                _context.SaveChanges();
+                TempData["Success"] = "❌ Librarian request rejected.";
             }
 
             return RedirectToAction("PendingApprovals");
@@ -125,38 +86,13 @@ namespace LibraryManagement.Controllers
         // View all users in system
         public IActionResult ManageUsers()
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Index", "Login");
-            }
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
-            var users = new List<UserModel>();
-
-            using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            con.Open();
-
-            var cmd = new SqlCommand(@"
-                SELECT UserId, Username, Email, FullName, Phone, Role, Status, CreatedDate, IsActive 
-                FROM Users 
-                WHERE Role != 'Admin'
-                ORDER BY CreatedDate DESC", con);
-
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
-            {
-                users.Add(new UserModel
-                {
-                    UserId = (int)reader["UserId"],
-                    Username = reader["Username"].ToString() ?? "",
-                    Email = reader["Email"].ToString() ?? "",
-                    FullName = reader["FullName"].ToString() ?? "",
-                    Phone = reader["Phone"]?.ToString() ?? "",
-                    Role = reader["Role"].ToString() ?? "",
-                    Status = reader["Status"]?.ToString() ?? "",
-                    CreatedDate = (DateTime)reader["CreatedDate"],
-                    IsActive = (bool)reader["IsActive"]
-                });
-            }
+            // Get all users who are NOT Admins (AccessLevel != 3)
+            var users = _context.Users
+                .Where(u => u.AccessLevel != 3)
+                .OrderByDescending(u => u.CreatedDate)
+                .ToList();
 
             return View(users);
         }
@@ -165,23 +101,18 @@ namespace LibraryManagement.Controllers
         [HttpPost]
         public IActionResult ToggleUserStatus(int userId)
         {
-            if (!IsAdmin())
+            if (!IsAdmin()) return RedirectToAction("Login", "Account");
+
+            var user = _context.Users.Find(userId);
+            if (user != null)
             {
-                return RedirectToAction("Index", "Login");
+                user.IsActive = !user.IsActive; // Flip true/false
+                _context.SaveChanges();
+                TempData["Success"] = "User status updated.";
             }
 
-            using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            con.Open();
-
-            var cmd = new SqlCommand(@"
-                UPDATE Users 
-                SET IsActive = CASE WHEN IsActive = 1 THEN 0 ELSE 1 END 
-                WHERE UserId = @UserId", con);
-            cmd.Parameters.AddWithValue("@UserId", userId);
-            cmd.ExecuteNonQuery();
-
-            TempData["Success"] = "User status updated. ";
             return RedirectToAction("ManageUsers");
+
         }
     }
 }

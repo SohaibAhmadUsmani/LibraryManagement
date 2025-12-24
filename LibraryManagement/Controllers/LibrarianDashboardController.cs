@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using LibraryManagement.Models;
+using LibraryManagement.Models.Entities;
 
 namespace LibraryManagement.Controllers
 {
