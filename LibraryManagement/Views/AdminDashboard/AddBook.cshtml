@@ -1,0 +1,44 @@
+﻿@model LibraryManagement.Models.Book
+
+<div class="container mt-4">
+    <div class="card shadow-sm" style="max-width: 600px; margin: auto;">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-book-medical me-2"></i>Add New Book</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="AddBook" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Book Title</label>
+                    <input asp-for="Title" class="form-control" placeholder="e.g. Intro to C#" required />
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Author</label>
+                        <input asp-for="Author" class="form-control" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Genre</label>
+                        <select asp-for="Genre" class="form-select">
+                            <option>Computer Science</option>
+                            <option>Mathematics</option>
+                            <option>Physics</option>
+                            <option>Literature</option>
+                            <option>History</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Quantity</label>
+                    <input asp-for="Quantity" type="number" class="form-control" value="1" min="1" required />
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success">Save Book</button>
+                    <a asp-action="ManageBooks" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,69 +1,74 @@
-﻿@model LibraryManagement.Models.LibrarianDashboardModel
-@{
+﻿@{
     ViewData["Title"] = "Librarian Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@if (TempData["message"] != null)
-{
-        <div class="alert alert-success">@TempData["message"]</div>
-}
-
-<div class="container mt-4">
-    <!-- Librarian Dashboard Banner Image -->
-    <div class="dashboard-banner mb-4">
-        <img src="~/images/librarian.jpg" alt="Librarian Dashboard Banner"
-             class="img-fluid rounded shadow" style="max-height:300px; object-fit:cover; width:100%;" />
+<div class="dashboard-header d-flex align-items-center justify-content-between text-white p-4 mb-4 rounded shadow" 
+     style="background: linear-gradient(to right, #163832, #235d51);">
+    <div>
+        <h1 class="fw-bold display-6">Librarian Workspace</h1>
+        <p class="lead mb-0 opacity-75">Manage circulation and inventory.</p>
     </div>
+    <img src="~/images/Librarian.jfif" class="rounded-circle border border-4 border-white shadow-sm" 
+         style="width: 100px; height: 100px; object-fit: cover;" alt="Profile">
+</div>
 
-    <h2>Librarian Dashboard</h2>
-    <p class="text-muted">Manage library operations</p>
-
-    <div class="row mt-4">
-        <div class="col-md-3 mb-3">
-            <div style="background:#4e73df; color:white; padding:20px; border-radius:10px;">
-                <h4>Total Students</h4>
-                <h2>@Model.TotalStudents</h2>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div style="background:#1cc88a; color:white; padding: 20px; border-radius:10px;">
-                <h4>Total Books</h4>
-                <h2>@Model.TotalBooks</h2>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div style="background:#36b9cc; color:white; padding:20px; border-radius:10px;">
-                <h4>Active Borrowings</h4>
-                <h2>@Model.TotalBorrowings</h2>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div style="background:#e74a3b; color:white; padding:20px; border-radius:10px;">
-                <h4>Overdue</h4>
-                <h2>@Model.OverdueBorrowings</h2>
-            </div>
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm p-3 text-center">
+            <h6 class="text-muted fw-bold">ACTIVE LOANS</h6>
+            <h2 class="display-5 fw-bold text-dark">@(ViewBag.IssuedBooks ?? 0)</h2>
         </div>
     </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm p-3 text-center">
+            <h6 class="text-muted fw-bold">RETURNS DUE TODAY</h6>
+            <h2 class="display-5 fw-bold text-warning">@(ViewBag.ReturnsDueToday ?? 0)</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm p-3 text-center">
+            <h6 class="text-muted fw-bold">OVERDUE</h6>
+            <h2 class="display-5 fw-bold text-danger">@(ViewBag.OverdueBooks ?? 0)</h2>
+        </div>
+    </div>
+</div>
 
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Library Management</h5>
-                </div>
-                <div class="card-body">
-                    <a href="/LibrarianDashboard/PendingRequests" class="btn btn-warning m-1">
-                        Pending Requests
-                        @if (ViewBag.PendingRequests != null && (int)ViewBag.PendingRequests > 0)
-                        {
-                                <span class="badge bg-danger">@ViewBag.PendingRequests</span>
-                        }
-                    </a>
-                    <a href="/LibrarianDashboard/ActiveBorrowings" class="btn btn-info m-1">Active Borrowings</a>
-                    <a href="/Book" class="btn btn-success m-1">Manage Books</a>
-                    <a href="/Student" class="btn btn-primary m-1">View Students</a>
-                </div>
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent fw-bold text-muted border-0">QUICK ACTIONS</div>
+    <div class="card-body">
+        <div class="row g-3">
+
+            <div class="col-md-4">
+                <a asp-controller="LibrarianDashboard" asp-action="BookRequests" class="btn btn-light w-100 py-3 shadow-sm text-start border">
+                    <i class="fas fa-hand-holding me-3"></i> Book Requests
+                </a>
             </div>
+
+            <div class="col-md-4">
+                <a asp-controller="LibrarianDashboard" asp-action="ReturnBook" class="btn btn-light w-100 py-3 shadow-sm text-start border">
+                    <i class="fas fa-undo me-3"></i> Process Return
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a asp-controller="LibrarianDashboard" asp-action="Inventory" class="btn btn-light w-100 py-3 shadow-sm text-start border">
+                    <i class="fas fa-search me-3"></i> View Inventory
+                </a>
+            </div>
+
+            <div class="col-md-6 mt-3">
+                <a asp-controller="LibrarianDashboard" asp-action="ActiveBorrowings" class="btn btn-outline-dark w-100 py-2">
+                    Active Borrowings List
+                </a>
+            </div>
+
+            <div class="col-md-6 mt-3">
+                <a asp-controller="LibrarianDashboard" asp-action="StudentLookup" class="btn btn-outline-dark w-100 py-2">
+                    Student Lookup
+                </a>
+            </div>
+
         </div>
     </div>
 </div>

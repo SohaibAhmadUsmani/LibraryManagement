@@ -1,0 +1,67 @@
+﻿@model IEnumerable<LibraryManagement.Models.Book>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Book Inventory</h2>
+    <div class="input-group" style="width: 300px;">
+        <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+        <input type="text" id="bookSearch" class="form-control" placeholder="Search title, author...">
+    </div>
+</div>
+
+<div class="mb-3">
+    <a asp-action="AddBook" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Book
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-bordered table-hover mb-0" id="bookTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Genre</th>
+                    <th>Copies</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.Title</td>
+                        <td>@item.Author</td>
+                        <td>@item.Genre</td>
+                        <td>
+                            @if(item.Quantity > 0)
+                            {
+                                <span class="badge bg-success">@item.Quantity Available</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Out of Stock</span>
+                            }
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i> Edit</a>
+                            <a href="#" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.getElementById('bookSearch').addEventListener('keyup', function() {
+        var searchValue = this.value.toLowerCase();
+        var tableRows = document.querySelectorAll('#bookTable tbody tr');
+
+        tableRows.forEach(function(row) {
+            var rowText = row.innerText.toLowerCase();
+            row.style.display = rowText.includes(searchValue) ? '' : 'none';
+        });
+    });
+</script>

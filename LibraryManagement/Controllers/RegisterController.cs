@@ -1,105 +1,49 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using LibraryManagement.Data;
 using LibraryManagement.Models;
+using System.Linq;
 
 namespace LibraryManagement.Controllers
 {
     public class RegisterController : Controller
     {
-        private readonly IConfiguration _config;
+        private readonly ApplicationDbContext _context;
 
-        public RegisterController(IConfiguration config)
+        public RegisterController(ApplicationDbContext context)
         {
-            _config = config;
+            _context = context;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
         [HttpPost]
-        public IActionResult Index(RegisterModel model)
+        public IActionResult Signup(User user)
         {
-            if (!ModelState.IsValid)
+            // 1. Check if username or email already exists
+            if (_context.Users.Any(u => u.Username == user.Username || u.Email == user.Email))
             {
-                return View(model);
+                ViewBag.Error = "Username or Email already exists.";
+                return View("Index", user);
             }
 
-            using var con = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            con.Open();
+            // 2. Set Default Values
+            user.Role = "Student";       // Default role
+            user.Status = "Pending";     // Default status (Admin must approve)
+            user.CreatedAt = System.DateTime.Now;
 
-            // Check if username or email already exists
-            var checkCmd = new SqlCommand(
-                "SELECT COUNT(*) FROM Users WHERE Username = @Username OR Email = @Email", con);
-            checkCmd.Parameters.AddWithValue("@Username", model.Username);
-            checkCmd.Parameters.AddWithValue("@Email", model.Email);
-
-            int existingUsers = (int)checkCmd.ExecuteScalar();
-            if (existingUsers > 0)
+            // 3. Save to Database
+            if (ModelState.IsValid)
             {
-                ViewBag.Error = "Username or Email already exists!";
-                return View(model);
+                _context.Users.Add(user);
+                _context.SaveChanges();
+                return RedirectToAction("Login", "Account");
             }
 
-            
-            string status = model.Role.ToLower() == "student" ? "Approved" : "Pending";
-
-            // Insert new user 
-            var insertCmd = new SqlCommand(@"
-                INSERT INTO Users (Username, Email, Password, Role, Status, FullName, Phone, CreatedDate, IsActive) 
-                OUTPUT INSERTED.UserId
-                VALUES (@Username, @Email, @Password, @Role, @Status, @FullName, @Phone, GETDATE(), 1)",
-                con);
-
-            insertCmd.Parameters.AddWithValue("@Username", model.Username);
-            insertCmd.Parameters.AddWithValue("@Email", model.Email);
-            insertCmd.Parameters.AddWithValue("@Password", model.Password); 
-            insertCmd.Parameters.AddWithValue("@Role", model.Role);
-            insertCmd.Parameters.AddWithValue("@Status", status);
-            insertCmd.Parameters.AddWithValue("@FullName", model.FullName);
-            insertCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
-
-            // Get the newly created UserId
-            int newUserId = (int)insertCmd.ExecuteScalar();
-
-   
-            if (model.Role.ToLower() == "student")
-            {
-                var studentCmd = new SqlCommand(@"
-                INSERT INTO Students (StudentName, Email, Phone, UserId) 
-                lVALUES (@Name, @Email, @Phone, @UserId)", con);
-                studentCmd.Parameters.AddWithValue("@Name", model.FullName);
-                studentCmd.Parameters.AddWithValue("@Email", model.Email);
-                studentCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
-                studentCmd.Parameters.AddWithValue("@UserId", newUserId);
-                studentCmd.ExecuteNonQuery();
-            }
-            else if (model.Role.ToLower() == "librarian")
-            {
-                // Insert into Librarians table 
-                var librarianCmd = new SqlCommand(@"
-                    INSERT INTO Librarians (Name, Phone, UserId) 
-                    VALUES (@Name, @Phone, @UserId)", con);
-                    librarianCmd.Parameters.AddWithValue("@Name", model.FullName);
-                     librarianCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
-                    librarianCmd.Parameters.AddWithValue("@UserId", newUserId);
-                    librarianCmd.ExecuteNonQuery();
-            }
-
-        
-            if (model.Role.ToLower() == "librarian")
-            {
-                TempData["Message"] = "Your librarian account is pending admin approval. You will be notified once approved.";
-                return RedirectToAction("PendingApproval");
-            }
-
-            TempData["Success"] = "Registration successful!  Please login.";
-            return RedirectToAction("Index", "Login");
-        }
-            public IActionResult PendingApproval()
-        {
-            return View();
+            return View("Index", user);
         }
     }
 }

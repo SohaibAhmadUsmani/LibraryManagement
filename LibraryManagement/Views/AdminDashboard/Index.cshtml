@@ -1,0 +1,149 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .glass-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-8px); /* Moves card up */
+        box-shadow: 0 12px 24px rgba(0,0,0,0.2) !important;
+    }
+    .btn-theme {
+        background-color: #163832;
+        color: white;
+        transition: opacity 0.2s;
+    }
+    .btn-theme:hover {
+        background-color: #235d51;
+        color: white;
+        opacity: 0.9;
+    }
+</style>
+
+<div class="dashboard-header d-flex align-items-center justify-content-between text-white p-4 mb-4 rounded shadow" 
+     style="background: linear-gradient(to right, #163832, #235d51);">
+    <div>
+        <h1 class="fw-bold display-6">Admin Dashboard</h1>
+        <p class="lead mb-0 opacity-75">Overview of library performance, users, and alerts.</p>
+    </div>
+    <img src="~/images/Admin.jfif" class="rounded-circle border border-4 border-white shadow-sm" 
+         style="width: 100px; height: 100px; object-fit: cover;" alt="Admin Profile">
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card glass-card text-center p-3 h-100 border-0 shadow-sm">
+            <h6 class="text-muted fw-bold">TOTAL BOOKS</h6>
+            <h2 class="display-6 fw-bold text-dark">@ViewBag.TotalBooks</h2>
+            <i class="fas fa-book text-success fa-2x mt-2 opacity-50"></i>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card glass-card text-center p-3 h-100 border-0 shadow-sm">
+            <h6 class="text-muted fw-bold">TOTAL USERS</h6>
+            <h2 class="display-6 fw-bold text-dark">@ViewBag.TotalUsers</h2>
+            <i class="fas fa-users text-primary fa-2x mt-2 opacity-50"></i>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card glass-card text-center p-3 h-100 border-0 shadow-sm">
+            <h6 class="text-muted fw-bold">PENDING FINES</h6>
+            <h2 class="display-6 fw-bold text-danger">$@ViewBag.TotalFines</h2>
+            <i class="fas fa-dollar-sign text-danger fa-2x mt-2 opacity-50"></i>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card glass-card text-center p-3 h-100 border-0 shadow-sm">
+            <h6 class="text-muted fw-bold">PENDING USERS</h6>
+            <h2 class="display-6 fw-bold text-warning">@ViewBag.PendingRequests</h2>
+            <i class="fas fa-user-clock text-warning fa-2x mt-2 opacity-50"></i>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card glass-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent fw-bold text-muted border-0">QUICK ACTIONS</div>
+            <div class="card-body d-grid gap-2">
+                <a asp-action="IssueDesk" class="btn btn-theme text-start"><i class="fas fa-hand-holding me-2"></i> Issue a Book</a>
+                <a asp-action="AddBook" class="btn btn-outline-dark text-start"><i class="fas fa-plus me-2"></i> Add New Stock</a>
+                <a asp-action="ManageUsers" class="btn btn-outline-dark text-start"><i class="fas fa-users-cog me-2"></i> Manage Users</a>
+                <a asp-action="Fines" class="btn btn-outline-danger text-start"><i class="fas fa-receipt me-2"></i> Collect Fines</a>
+            </div>
+        </div>
+
+        <div class="card glass-card border-0 shadow-sm">
+            <div class="card-header bg-transparent fw-bold text-muted border-0" style="color:#163832;">POST ANNOUNCEMENT</div>
+            <div class="card-body">
+                <form asp-action="PostAnnouncement" method="post">
+                    <div class="mb-2">
+                        <input type="text" name="title" class="form-control" placeholder="Subject / Title" required>
+                    </div>
+                    <div class="mb-2">
+                        <select name="type" class="form-select">
+                            <option value="Info">General Info</option>
+                            <option value="Alert">Important Alert</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <textarea name="content" class="form-control" rows="3" placeholder="Write your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-theme w-100 fw-bold">PUBLISH</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card glass-card border-0 shadow-sm p-3 h-100">
+            <h5 class="card-title fw-bold text-muted mb-3">Library Statistics</h5>
+            <div class="row align-items-center h-100">
+                <div class="col-md-6">
+                    <canvas id="userChart"></canvas>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="bookChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // User Chart
+    var userCtx = document.getElementById('userChart').getContext('2d');
+    var userChart = new Chart(userCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Students', 'Admins', 'Librarians'],
+            datasets: [{
+                data: [@ViewBag.UserChartData],
+                backgroundColor: ['#DAF1DE', '#163832', '#235d51']
+            }]
+        }
+    });
+
+    // Book Chart
+    var bookCtx = document.getElementById('bookChart').getContext('2d');
+    var bookChart = new Chart(bookCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Total Stock', 'Issued'],
+            datasets: [{
+                label: 'Books',
+                data: [@ViewBag.BookChartData],
+                backgroundColor: ['#163832', '#DAF1DE']
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>

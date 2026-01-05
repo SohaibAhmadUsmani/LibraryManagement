@@ -1,0 +1,43 @@
+﻿@model LibraryManagement.Models.User
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white text-center py-4">
+                    <h4 class="mb-0 fw-bold"><i class="fas fa-id-badge me-2"></i>LIBRARIAN ID</h4>
+                </div>
+                <div class="card-body text-center p-5">
+                    <img src="https://ui-avatars.com/api/?name=@Model.Name&background=0D6EFD&color=fff&size=128" 
+                         class="rounded-circle mb-4 shadow" alt="Profile">
+
+                    <h2 class="fw-bold text-dark">@Model.Name</h2>
+                    <p class="text-uppercase text-muted fw-bold letter-spacing-2">@Model.Role</p>
+
+                    <hr class="my-4" />
+
+                    <div class="text-start px-4">
+                        <div class="mb-3">
+                            <label class="small text-muted fw-bold">EMAIL ADDRESS</label>
+                            <div class="fs-5 text-dark">@Model.Email</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small text-muted fw-bold">JOINED DATE</label>
+                            <div class="fs-5 text-dark">@Model.CreatedAt.ToShortDateString()</div>
+                        </div>
+                        <div>
+                            <label class="small text-muted fw-bold">STATUS</label>
+                            <div><span class="badge bg-success rounded-pill px-3">Active Staff</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light text-center py-3">
+                    <small class="text-muted">Library Management System v1.0</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

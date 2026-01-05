@@ -1,0 +1,90 @@
+﻿@model IEnumerable<LibraryManagement.Models.Book>
+
+@{
+    ViewData["Title"] = "Library Inventory";
+}
+
+<div class="container-fluid">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">@TempData["Success"] <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-boxes me-2"></i>Inventory</h2>
+        <button class="btn btn-success rounded-pill px-4" type="button" data-bs-toggle="collapse" data-bs-target="#addBookForm">
+            <i class="fas fa-plus me-2"></i> Add New Book
+        </button>
+    </div>
+
+    <div class="collapse mb-4" id="addBookForm">
+        <div class="card card-body shadow-sm bg-light border-0">
+            <h5 class="mb-3 text-success">Add New Book to Catalog</h5>
+            <form asp-action="AddBook" method="post">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <input type="text" name="title" class="form-control" placeholder="Book Title" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="author" class="form-control" placeholder="Author" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="genre" class="form-control" placeholder="Genre" required>
+                    </div>
+                    <div class="col-md-1">
+                        <input type="number" name="quantity" class="form-control" placeholder="Qty" value="1" min="1" required>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-dark w-100">Add</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Title</th>
+                        <th>Author</th>
+                        <th>Genre</th> <th class="text-center">Stock Level</th>
+                        <th class="text-center">Quick Adjust</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                            <tr>
+                                <td class="ps-4 fw-bold">@item.Title</td>
+                                <td>@item.Author</td>
+
+                                <td><span class="badge bg-secondary text-light">@item.Genre</span></td>
+
+                                <td class="text-center fw-bold @(item.Quantity < 3 ? "text-danger" : "text-dark")">
+                                @item.Quantity
+                                @if (item.Quantity > 0)
+                                {
+                                    <span class="badge bg-success small" style="font-size: 0.6em">IN STOCK</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger small" style="font-size: 0.6em">OUT OF STOCK</span>
+                                }
+                                </td>
+
+                                <td class="text-center">
+                                    <form asp-action="UpdateStock" method="post" class="d-inline-block">
+                                        <input type="hidden" name="id" value="@item.BookId" />
+                                        <button type="submit" name="adjustment" value="-1" class="btn btn-sm btn-outline-danger me-1"><i class="fas fa-minus"></i></button>
+                                        <button type="submit" name="adjustment" value="1" class="btn btn-sm btn-outline-success"><i class="fas fa-plus"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

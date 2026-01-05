@@ -1,0 +1,55 @@
+﻿@model IEnumerable<LibraryManagement.Models.Borrowing>
+
+<h2 class="mb-4">My Reading History</h2>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Book Title</th>
+                    <th>Requested On</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                        <tr>
+                            <td class="fw-bold">@item.BookName</td>
+                            <td>@item.RequestDate.ToShortDateString()</td>
+                            <td>
+                            @if (item.Status == "Returned")
+                            {
+                                        <span class="text-muted">Returned on @item.ReturnedDate?.ToShortDateString()</span>
+                            }
+                            else if (item.DueDate < DateTime.Now)
+                            {
+                                        <span class="text-danger fw-bold">@item.DueDate?.ToShortDateString() (Overdue)</span>
+                            }
+                            else
+                            {
+                                        <span>@item.DueDate?.ToShortDateString()</span>
+                            }
+                            </td>
+                            <td>
+                            @if (item.Status == "Approved")
+                            {
+                                <span class="badge bg-success">Active Loan</span>
+                            }
+                            else if (item.Status == "Pending")
+                            {
+                                <span class="badge bg-warning text-dark">Pending Approval</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Returned</span>
+                            }
+                            </td>
+                        </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

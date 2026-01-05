@@ -1,50 +1,34 @@
-﻿using LibraryManagement.Data;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using LibraryManagement.Data;
 using LibraryManagement.Models;
+using System.Linq;
 
 namespace LibraryManagement.Controllers
 {
     public class BookController : Controller
     {
-        private readonly LibraryContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public BookController(LibraryContext context)
+        public BookController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // Helper to check access (Level 2+ required for managing books)
-        private bool HasAccess()
-        {
-            int? level = HttpContext.Session.GetInt32("AccessLevel");
-            return level != null && level >= 2;
-        }
-
+        // GET: Book
         public IActionResult Index()
         {
-            if (!HasAccess()) return RedirectToAction("Login", "Account");
-
-            // EF Core: Simple .ToList()
+            // This displays the list of books to everyone
             var books = _context.Books.ToList();
             return View(books);
         }
 
-        public IActionResult Create()
+        // GET: Book/Details/5
+        public IActionResult Details(int id)
         {
-            if (!HasAccess()) return RedirectToAction("Login", "Account");
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult Create(BookModel book)
-        {
-            if (!HasAccess()) return RedirectToAction("Login", "Account");
-
-            if (ModelState.IsValid)
+            var book = _context.Books.FirstOrDefault(b => b.BookId == id);
+            if (book == null)
             {
-                _context.Books.Add(book);
-                _context.SaveChanges(); // Commits to DB
-                return RedirectToAction("Index");
+                return NotFound();
             }
             return View(book);
         }

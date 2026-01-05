@@ -1,0 +1,80 @@
+﻿@model IEnumerable<LibraryManagement.Models.Borrowing>
+
+@{
+    ViewData["Title"] = "Fines Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Fines Management</h2>
+
+    <div class="card shadow border-0">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Student</th>
+                        <th>Book</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Fine Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        // Calculate Dynamic Fine for Active Overdues
+                        int currentFine = item.FineAmount ?? 0;
+                        bool isActiveOverdue = item.ReturnedDate == null && item.DueDate < DateTime.Now;
+
+                        if (isActiveOverdue)
+                        {
+                            // $10 per day late
+                            currentFine = (DateTime.Now - item.DueDate.Value).Days * 10;
+                        }
+
+                            <tr>
+                                <td>@item.StudentName</td>
+                                <td>@item.BookName</td>
+                                <td>
+                                @if (item.Status == "Lost")
+                                {
+                                            <span class="badge bg-danger">LOST BOOK</span>
+                                }
+                                else if (isActiveOverdue)
+                                {
+                                            <span class="badge bg-warning text-dark">Overdue (Active)</span>
+                                }
+                                else
+                                {
+                                            <span class="badge bg-secondary">Returned / Unpaid</span>
+                                }
+                                </td>
+                                <td>@item.DueDate?.ToShortDateString()</td>
+                                <td class="fw-bold text-danger">$@currentFine</td>
+                                <td>
+                                @if (item.Status != "Paid")
+                                {
+                                            <a asp-action="CollectFine" asp-route-id="@item.RequestId" 
+                                               class="btn btn-success btn-sm"
+                                               onclick="return confirm('Confirm payment of $@currentFine?');">
+                                                <i class="fas fa-dollar-sign"></i> Collect Payment
+                                            </a>
+                                }
+                                else
+                                {
+                                            <span class="text-success"><i class="fas fa-check"></i> Paid</span>
+                                }
+                                </td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+            @if (!Model.Any())
+            {
+                    <div class="alert alert-info text-center mt-3">No pending fines found.</div>
+            }
+        </div>
+    </div>
+</div>

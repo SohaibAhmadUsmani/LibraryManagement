@@ -1,352 +1,133 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
 using LibraryManagement.Models;
-using LibraryManagement.Models.Entities;
+using Microsoft.AspNetCore.Http;
+using System.Linq;
+using System;
+using LibraryManagement.Data;
 
 namespace LibraryManagement.Controllers
 {
-    public class StudentDashboardController : Controller
+    // FIX: Using Primary Constructor syntax (fixes "Use primary constructor" suggestions)
+    public class StudentDashboardController(ApplicationDbContext context) : Controller
     {
-        private readonly IConfiguration _config;
-
-        public StudentDashboardController(IConfiguration config)
-        {
-            _config = config;
-        }
-
-        private bool IsStudent()
-        {
-            var role = HttpContext.Session.GetString("Role");
-            return role == "Student";
-        }
-
-        private int GetUserId()
-        {
-            return HttpContext.Session.GetInt32("UserId") ?? 0;
-        }
-
-        private string GetStudentName()
-        {
-            return HttpContext.Session.GetString("FullName") ?? "";
-        }
-
+        private readonly ApplicationDbContext _context = context;
+        // 1. UPDATE INDEX METHOD
         public IActionResult Index()
         {
-            if (!IsStudent())
-            {
-                return RedirectToAction("Index", "Login");
-            }
+            if (HttpContext.Session.GetString("Role") != "Student") return RedirectToAction("Login", "Account");
+            string studentName = HttpContext.Session.GetString("Name");
 
-            var userId = GetUserId();
-            var studentName = GetStudentName();
+            // 1. Borrowed
+            ViewBag.BorrowedCount = _context.Borrowing.Count(b => b.StudentName == studentName && b.ReturnedDate == null);
+            // 2. History
+            ViewBag.HistoryCount = _context.Borrowing.Count(b => b.StudentName == studentName && b.ReturnedDate != null);
+            // 3. Due Soon (3 days)
+            DateTime limit = DateTime.Now.AddDays(3);
+            ViewBag.DueSoon = _context.Borrowing.Count(b => b.StudentName == studentName && b.ReturnedDate == null && b.DueDate <= limit);
+            // 4. Fines
+            var myOverdue = _context.Borrowing.Where(b => b.StudentName == studentName && b.ReturnedDate == null && b.DueDate < DateTime.Now).ToList();
+            int fines = myOverdue.Sum(b => (DateTime.Now - b.DueDate.Value).Days * 10);
+            ViewBag.MyFines = fines + (_context.Borrowing.Where(b => b.StudentName == studentName).Sum(b => (int?)b.FineAmount) ?? 0);
+            // 5. Lost Books (Placeholder stat)
+            ViewBag.LostBooks = _context.Borrowing.Count(b => b.StudentName == studentName && b.Status == "Lost");
 
-            var model = new StudentDashboardModel
-            {
-                StudentName = studentName,
-                MyBorrowedBooks = 0,
-                OverdueBooks = 0,
-                AvailableBooks = 0,
-                PendingRequests = 0,
-                RecentBooks = new List<BookModel>(),
-                MyRequests = new List<BorrowRequestModel>()
-            };
+            // Announcements
+            ViewBag.Announcements = _context.Announcements.OrderByDescending(a => a.PostedDate).Take(3).ToList();
 
-            string connString = _config.GetConnectionString("DefaultConnection");
-
-            using (var con = new SqlConnection(connString))
-            {
-                con.Open();
-
-                SqlCommand cmd1 = new SqlCommand("SELECT COUNT(*) FROM BorrowRequests WHERE UserId = @UserId AND Status = 'Approved'", con);
-                cmd1.Parameters.AddWithValue("@UserId", userId);
-                model.MyBorrowedBooks = (int)cmd1.ExecuteScalar();
-
-                SqlCommand cmd2 = new SqlCommand("SELECT COUNT(*) FROM BorrowRequests WHERE UserId = @UserId AND Status = 'Approved' AND DueDate < GETDATE()", con);
-                cmd2.Parameters.AddWithValue("@UserId", userId);
-                model.OverdueBooks = (int)cmd2.ExecuteScalar();
-
-                SqlCommand cmd3 = new SqlCommand("SELECT COUNT(*) FROM Books", con);
-                model.AvailableBooks = (int)cmd3.ExecuteScalar();
-
-                SqlCommand cmd4 = new SqlCommand("SELECT COUNT(*) FROM BorrowRequests WHERE UserId = @UserId AND Status = 'Pending'", con);
-                cmd4.Parameters.AddWithValue("@UserId", userId);
-                model.PendingRequests = (int)cmd4.ExecuteScalar();
-
-                SqlCommand cmd5 = new SqlCommand("SELECT TOP 5 BookId, BookName, Author, ISNULL(Quantity, 1) as Quantity FROM Books ORDER BY BookId DESC", con);
-                using (var reader5 = cmd5.ExecuteReader())
-                {
-                    while (reader5.Read())
-                    {
-                        model.RecentBooks.Add(new BookModel
-                        {
-                            BookId = (int)reader5["BookId"],
-                            BookName = reader5["BookName"].ToString(),
-                            Author = reader5["Author"].ToString(),
-                            Quantity = (int)reader5["Quantity"]
-                        });
-                    }
-                }
-
-                SqlCommand cmd6 = new SqlCommand("SELECT RequestId, BookName, RequestDate, Status, DueDate FROM BorrowRequests WHERE UserId = @UserId AND Status IN ('Approved', 'Pending') ORDER BY RequestDate DESC", con);
-                cmd6.Parameters.AddWithValue("@UserId", userId);
-                using (var reader6 = cmd6.ExecuteReader())
-                {
-                    while (reader6.Read())
-                    {
-                        var req = new BorrowRequestModel();
-                        req.RequestId = (int)reader6["RequestId"];
-                        req.BookName = reader6["BookName"].ToString();
-                        req.RequestDate = (DateTime)reader6["RequestDate"];
-                        req.Status = reader6["Status"].ToString();
-                        if (reader6["DueDate"] != DBNull.Value)
-                        {
-                            req.DueDate = (DateTime)reader6["DueDate"];
-                        }
-                        model.MyRequests.Add(req);
-                    }
-                }
-            }
-
-            return View(model);
+            return View();
         }
 
-        public IActionResult SearchBooks(string searchTerm)
+        // 2. ADD NEW ACTION: Report Lost
+        [HttpPost]
+        public IActionResult ReportLost(int id)
         {
-            if (!IsStudent())
+            var loan = _context.Borrowing.FirstOrDefault(b => b.RequestId == id);
+            if (loan != null)
             {
-                return RedirectToAction("Index", "Login");
+                loan.Status = "Lost";
+                loan.ReturnedDate = DateTime.Now; // Loop closed
+                loan.FineAmount = 500; // Fixed Penalty for Lost Book
+
+                _context.SaveChanges();
+                TempData["Error"] = "Book reported LOST. Fine of $500 applied.";
             }
+            return RedirectToAction("Index");
+        }
 
-            var books = new List<BookModel>();
-            string connString = _config.GetConnectionString("DefaultConnection");
-
-            using (var con = new SqlConnection(connString))
-            {
-                con.Open();
-
-                string query = "SELECT BookId, BookName, Author, ISNULL(Quantity, 1) as Quantity FROM Books WHERE ISNULL(Quantity, 1) > 0";
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    query += " AND (BookName LIKE @Search OR Author LIKE @Search)";
-                }
-                query += " ORDER BY BookName";
-
-                SqlCommand cmd = new SqlCommand(query, con);
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    cmd.Parameters.AddWithValue("@Search", "%" + searchTerm + "%");
-                }
-
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        books.Add(new BookModel
-                        {
-                            BookId = (int)reader["BookId"],
-                            BookName = reader["BookName"].ToString(),
-                            Author = reader["Author"].ToString(),
-                            Quantity = (int)reader["Quantity"]
-                        });
-                    }
-                }
-            }
-
-            ViewBag.SearchTerm = searchTerm;
+        public IActionResult BrowseBooks()
+        {
+            // Sending the list of Books to the view
+            var books = _context.Books.Where(b => b.Quantity > 0).ToList();
             return View(books);
         }
 
-        [HttpPost]
-        public IActionResult RequestBook(int bookId)
+        public IActionResult RequestBook(int id)
         {
-            if (!IsStudent())
+            var username = HttpContext.Session.GetString("Name");
+            if (username == null) return RedirectToAction("Login", "Account");
+
+            var book = _context.Books.Find(id);
+            if (book != null && book.Quantity > 0)
             {
-                return RedirectToAction("Index", "Login");
-            }
+                bool alreadyHas = _context.Borrowing.Any(b => b.StudentName == username && b.BookName == book.Title && b.ReturnedDate == null);
 
-            var userId = GetUserId();
-            var studentName = GetStudentName();
-            string connString = _config.GetConnectionString("DefaultConnection");
-
-            using (var con = new SqlConnection(connString))
-            {
-                con.Open();
-
-                SqlCommand checkCmd = new SqlCommand("SELECT COUNT(*) FROM BorrowRequests WHERE UserId = @UserId AND BookId = @BookId AND Status IN ('Pending', 'Approved')", con);
-                checkCmd.Parameters.AddWithValue("@UserId", userId);
-                checkCmd.Parameters.AddWithValue("@BookId", bookId);
-                int existing = (int)checkCmd.ExecuteScalar();
-
-                if (existing > 0)
+                if (alreadyHas)
                 {
-                    TempData["Error"] = "You already have a pending or active request for this book.";
-                    return RedirectToAction("SearchBooks");
+                    TempData["Error"] = "You already have a copy of this book!";
+                    return RedirectToAction("BrowseBooks");
                 }
 
-                string bookName = "";
-                SqlCommand getBookCmd = new SqlCommand("SELECT BookName FROM Books WHERE BookId = @BookId", con);
-                getBookCmd.Parameters.AddWithValue("@BookId", bookId);
-                var result = getBookCmd.ExecuteScalar();
-                if (result != null)
+                var req = new Borrowing
                 {
-                    bookName = result.ToString();
-                }
+                    StudentName = username,
+                    BookName = book.Title,
+                    RequestDate = DateTime.Now,
+                    Status = "Pending",
+                    DueDate = DateTime.Now.AddDays(14)
+                };
 
-                SqlCommand insertCmd = new SqlCommand("INSERT INTO BorrowRequests (UserId, StudentName, BookId, BookName, RequestDate, Status) VALUES (@UserId, @StudentName, @BookId, @BookName, GETDATE(), 'Pending')", con);
-                insertCmd.Parameters.AddWithValue("@UserId", userId);
-                insertCmd.Parameters.AddWithValue("@StudentName", studentName);
-                insertCmd.Parameters.AddWithValue("@BookId", bookId);
-                insertCmd.Parameters.AddWithValue("@BookName", bookName);
-                insertCmd.ExecuteNonQuery();
+                _context.Borrowing.Add(req);
+                _context.SaveChanges();
+                TempData["Success"] = "Book Requested Successfully!";
             }
-
-            TempData["Success"] = "Book request submitted!  Please wait for librarian approval.";
-            return RedirectToAction("MyBorrowings");
+            return RedirectToAction("BrowseBooks");
         }
 
-        public IActionResult MyBorrowings()
+        public IActionResult MyHistory()
         {
-            if (!IsStudent())
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            var userId = GetUserId();
-            var requests = new List<BorrowRequestModel>();
-            string connString = _config.GetConnectionString("DefaultConnection");
-
-            using (var con = new SqlConnection(connString))
-            {
-                con.Open();
-
-                SqlCommand cmd = new SqlCommand("SELECT RequestId, BookId, BookName, RequestDate, Status, DueDate, ReturnedDate FROM BorrowRequests WHERE UserId = @UserId ORDER BY RequestDate DESC", con);
-                cmd.Parameters.AddWithValue("@UserId", userId);
-
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var req = new BorrowRequestModel();
-                        req.RequestId = (int)reader["RequestId"];
-                        req.BookId = (int)reader["BookId"];
-                        req.BookName = reader["BookName"].ToString();
-                        req.RequestDate = (DateTime)reader["RequestDate"];
-                        req.Status = reader["Status"].ToString();
-
-                        if (reader["DueDate"] != DBNull.Value)
-                        {
-                            req.DueDate = (DateTime)reader["DueDate"];
-                        }
-
-                        if (reader["ReturnedDate"] != DBNull.Value)
-                        {
-                            req.ReturnedDate = (DateTime)reader["ReturnedDate"];
-                        }
-
-                        requests.Add(req);
-                    }
-                }
-            }
-
-            return View(requests);
+            var username = HttpContext.Session.GetString("Name");
+            var history = _context.Borrowing
+                .Where(b => b.StudentName == username)
+                .OrderByDescending(b => b.RequestDate)
+                .ToList();
+            return View(history);
         }
 
-        [HttpPost]
-        public IActionResult ReturnBook(IFormCollection form)
-        {
-            if (!IsStudent())
-            {
-                return RedirectToAction("Index", "Login");
-            }
-
-            string reqIdStr = form["requestId"].ToString();
-            int requestId = 0;
-            int.TryParse(reqIdStr, out requestId);
-
-            if (requestId == 0)
-            {
-                TempData["Error"] = "Invalid request ID.";
-                return RedirectToAction("MyBorrowings");
-            }
-
-            string connString = _config.GetConnectionString("DefaultConnection");
-
-            using (var con = new SqlConnection(connString))
-            {
-                con.Open();
-
-                int bookId = 0;
-                string status = "";
-
-                SqlCommand checkCmd = new SqlCommand("SELECT BookId, Status FROM BorrowRequests WHERE RequestId = @RequestId", con);
-                checkCmd.Parameters.AddWithValue("@RequestId", requestId);
-
-                using (var reader = checkCmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        bookId = (int)reader["BookId"];
-                        status = reader["Status"].ToString();
-                    }
-                }
-
-                if (bookId == 0)
-                {
-                    TempData["Error"] = "Request not found.";
-                    return RedirectToAction("MyBorrowings");
-                }
-
-                if (status != "Approved")
-                {
-                    TempData["Error"] = "Book cannot be returned.  Status: " + status;
-                    return RedirectToAction("MyBorrowings");
-                }
-
-                SqlCommand returnCmd = new SqlCommand("UPDATE BorrowRequests SET Status = 'Returned', ReturnedDate = GETDATE() WHERE RequestId = @RequestId", con);
-                returnCmd.Parameters.AddWithValue("@RequestId", requestId);
-                returnCmd.ExecuteNonQuery();
-
-                SqlCommand updateCmd = new SqlCommand("UPDATE Books SET Quantity = Quantity + 1 WHERE BookId = @BookId", con);
-                updateCmd.Parameters.AddWithValue("@BookId", bookId);
-                updateCmd.ExecuteNonQuery();
-            }
-
-            TempData["Success"] = "Book returned successfully!";
-            return RedirectToAction("MyBorrowings");
-        }
-
+        // 5. MY PROFILE ACTION
+        // 5. MY PROFILE (FIXED)
         public IActionResult Profile()
         {
-            if (!IsStudent())
+            // 1. Get the username from the session
+            var activeUser = HttpContext.Session.GetString("Name");
+
+            // Safety Check: If session is empty, go to login
+            if (string.IsNullOrEmpty(activeUser))
             {
-                return RedirectToAction("Index", "Login");
+                return RedirectToAction("Login", "Account");
             }
 
-            var userId = GetUserId();
-            var user = new UserModel();
-            string connString = _config.GetConnectionString("DefaultConnection");
+            // 2. SMARTER LOOKUP: Check if the session stored the 'Username' OR the 'Name'
+            // This fixes the issue where it couldn't find the user.
+            var user = _context.Users.FirstOrDefault(u => u.Username == activeUser || u.Name == activeUser);
 
-            using (var con = new SqlConnection(connString))
+            // 3. If we still can't find the user in the DB, show an error instead of a login page
+            if (user == null)
             {
-                con.Open();
-
-                SqlCommand cmd = new SqlCommand("SELECT UserId, Username, Email, FullName, Phone, Role FROM Users WHERE UserId = @UserId", con);
-                cmd.Parameters.AddWithValue("@UserId", userId);
-
-                using (var reader = cmd.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        user.UserId = (int)reader["UserId"];
-                        user.Username = reader["Username"].ToString();
-                        user.Email = reader["Email"].ToString();
-                        user.FullName = reader["FullName"].ToString();
-                        user.Phone = reader["Phone"].ToString();
-                        user.Role = reader["Role"].ToString();
-                    }
-                }
+                ViewBag.ErrorMessage = "User details not found in database.";
+                return View("Error"); // Optional: You can route to a generic error page
             }
 
+            // 4. Send the user data to the View
             return View(user);
         }
     }

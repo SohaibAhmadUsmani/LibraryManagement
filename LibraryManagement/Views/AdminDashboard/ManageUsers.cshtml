@@ -1,0 +1,91 @@
+﻿@model IEnumerable<LibraryManagement.Models.User>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>User Management</h2>
+    <div class="input-group" style="width: 300px;">
+        <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+        <input type="text" id="userSearch" class="form-control" placeholder="Search users...">
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Registered Users</h5>
+            <button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Add User</button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover table-striped mb-0" id="userTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="https://ui-avatars.com/api/?name=@item.Name&background=random" 
+                                         alt="User" class="rounded-circle me-3" width="40" height="40">
+                                    <div>
+                                        <div class="fw-bold">@item.FullName</div>
+                                        <small class="text-muted">@item.Username</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>@item.Email</td>
+                            <td>
+                                <span class="badge @(item.Role == "Admin" ? "bg-danger" : (item.Role == "Librarian" ? "bg-info" : "bg-primary"))">
+                                @item.Role
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge @(item.Status == "Active" ? "bg-success" : "bg-secondary")">
+                                @item.Status
+                                </span>
+                            </td>
+                            <td>
+                                <a asp-action="ToggleStatus" asp-route-id="@item.UserId" 
+                                   class="btn btn-sm btn-outline-warning" title="Toggle Status">
+                                    <i class="fas fa-power-off"></i>
+                                </a>
+                                <a asp-action="EditUser" asp-route-id="@item.UserId" 
+                                   class="btn btn-sm btn-info text-white" title="Edit Details">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a asp-action="ResetPassword" asp-route-id="@item.UserId" 
+                                   class="btn btn-sm btn-outline-dark" 
+                                   onclick="return confirm('Reset password to 123456?');" title="Reset Password">
+                                    <i class="fas fa-key"></i>
+                                </a>
+                                <a asp-action="DeleteUser" asp-route-id="@item.UserId" 
+                                   class="btn btn-sm btn-outline-danger" 
+                                   onclick="return confirm('Are you sure?');" title="Delete User">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.getElementById('userSearch').addEventListener('keyup', function() {
+        var searchValue = this.value.toLowerCase();
+        var tableRows = document.querySelectorAll('#userTable tbody tr');
+
+        tableRows.forEach(function(row) {
+            var rowText = row.innerText.toLowerCase();
+            row.style.display = rowText.includes(searchValue) ? '' : 'none';
+        });
+    });
+</script>

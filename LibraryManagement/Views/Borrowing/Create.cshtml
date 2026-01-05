@@ -1,5 +1,6 @@
-﻿@using LibraryManagement.Models.Entities
-@model BorrowingModel
+﻿@using LibraryManagement.Models;
+@using LibraryManagement.Models;
+@model Borrowing
 @{
     ViewData["Title"] = "Add Borrowing";
 }
@@ -16,7 +17,7 @@
     </div>
     <div class="mb-3">
         <label>BorrowDate</label>
-        <input asp-for="BorrowDate" type="date" class="form-control" />
+        <input asp-for="RequestDate" type="date" class="form-control" />
     </div>
     <div class="mb-3">
         <label>ReturnedDate</label>

@@ -1,74 +1,166 @@
-﻿@{
-    var userRole = Context.Session.GetString("Role");
-    var isLoggedIn = !string.IsNullOrEmpty(userRole);
-}
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1. 0" />
-    <title>@ViewData["Title"] - Library Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Library Management System</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        body { overflow-x: hidden; background-color: #f8f9fa; }
+
+        /* WRAPPER & SIDEBAR STRUCTURE */
+        #wrapper { display: flex; width: 100%; transition: all 0.3s ease; }
+
+        #sidebar-wrapper {
+            min-width: 250px; max-width: 250px;
+            background-color: #212529; color: white;
+            min-height: 100vh; transition: margin 0.3s ease;
+        }
+
+        #wrapper.toggled #sidebar-wrapper { margin-left: -250px; }
+
+        .sidebar-heading {
+            padding: 1.2rem; font-size: 1.2rem; font-weight: bold;
+            text-align: center; background: #1a1e21; color: #ffc107;
+            border-bottom: 1px solid #4b545c;
+        }
+
+        /* MENU ITEMS STYLE */
+        .list-group-item {
+            background-color: #212529; color: #adb5bd; border: none; padding: 15px 20px;
+        }
+        .list-group-item:hover { 
+            background-color: #343a40; color: #fff; padding-left: 25px; transition: 0.2s; cursor: pointer;
+        }
+
+        /* CONTENT AREA */
+        #page-content-wrapper { width: 100%; padding: 20px; }
+
+        /* NAVBAR STYLING */
+        .navbar { box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
+    </style>
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">Library Management System</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+    <div id="wrapper">
 
-                    @if (!isLoggedIn)
+        @if (HttpContextAccessor.HttpContext.Session.GetString("Role") != null)
+        {
+                <div id="sidebar-wrapper">
+                    <div class="sidebar-heading"><i class="fas fa-book-reader me-2"></i>Library System</div>
+                    <div class="list-group list-group-flush">
+
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                     {
-                            <li class="nav-item"><a class="nav-link" href="/Login">Login</a></li>
+                                <div class="px-3 py-2 text-muted small text-uppercase fw-bold">Management</div>
+                                <a asp-controller="AdminDashboard" asp-action="Index" class="list-group-item list-group-item-action"><i class="fas fa-tachometer-alt me-2"></i> Dashboard</a>
+                                <a asp-controller="AdminDashboard" asp-action="IssueDesk" class="list-group-item list-group-item-action"><i class="fas fa-hand-holding-book me-2"></i> Issue Desk</a>
+                                <a asp-controller="AdminDashboard" asp-action="ManageBooks" class="list-group-item list-group-item-action"><i class="fas fa-book me-2"></i> Inventory</a>
+                                <a asp-controller="AdminDashboard" asp-action="ManageUsers" class="list-group-item list-group-item-action"><i class="fas fa-users me-2"></i> Users</a>
+                                <a asp-controller="AdminDashboard" asp-action="Fines" class="list-group-item list-group-item-action"><i class="fas fa-file-invoice-dollar me-2"></i> Fines</a>
+                                <a asp-controller="AdminDashboard" asp-action="Operations" class="list-group-item list-group-item-action"><i class="fas fa-cogs me-2"></i> Operations</a>
                     }
-                    else if (userRole == "Admin")
+                    else if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Librarian")
                     {
-                            <li class="nav-item"><a class="nav-link" href="/Dashboard">Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/Admin/PendingApprovals">Pending Approvals</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/Admin/ManageUsers">Manage Users</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/Student">Students</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/Book">Books</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/Borrowing">Borrowings</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/Librarian">Librarians</a></li>
-                            <li class="nav-item"><a class="nav-link text-danger" href="/Login/Logout">Logout</a></li>
+                                <div class="px-3 py-2 text-muted small text-uppercase fw-bold">Librarian Staff</div>
+                                <a asp-controller="Librarian" asp-action="Index" class="list-group-item list-group-item-action"><i class="fas fa-id-card-alt me-2"></i> Workspace</a>
+                                <a asp-controller="Librarian" asp-action="BookRequests" class="list-group-item list-group-item-action"><i class="fas fa-hand-holding-book me-2"></i> Issue Desk</a>
+                                <a asp-controller="Librarian" asp-action="ReturnBook" class="list-group-item list-group-item-action"><i class="fas fa-undo me-2"></i> Return & Fines</a>
+                                <a asp-controller="Librarian" asp-action="Inventory" class="list-group-item list-group-item-action"><i class="fas fa-boxes me-2"></i> Inventory</a>
                     }
-                    else if (userRole == "Librarian")
+                    else
                     {
-        <li class="nav-item"><a class="nav-link" href="/LibrarianDashboard">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="/LibrarianDashboard/PendingRequests">Pending Requests</a></li>
-        <li class="nav-item"><a class="nav-link" href="/LibrarianDashboard/ActiveBorrowings">Active Borrowings</a></li>
-        <li class="nav-item"><a class="nav-link" href="/Book">Manage Books</a></li>
-        <li class="nav-item"><a class="nav-link" href="/Student">View Students</a></li>
-        <li class="nav-item"><a class="nav-link text-danger" href="/Login/Logout">Logout</a></li>
-                    }
-                    else if (userRole == "Student")
-                    {
-                            <li class="nav-item"><a class="nav-link" href="/StudentDashboard">Dashboard</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/StudentDashboard/SearchBooks">Search Books</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/StudentDashboard/MyBorrowings">My Borrowings</a></li>
-                            <li class="nav-item"><a class="nav-link" href="/StudentDashboard/Profile">My Profile</a></li>
-                            <li class="nav-item"><a class="nav-link text-danger" href="/Login/Logout">Logout</a></li>
+                                <div class="px-3 py-2 text-muted small text-uppercase fw-bold">Student Portal</div>
+                                <a asp-controller="StudentDashboard" asp-action="Index" class="list-group-item list-group-item-action"><i class="fas fa-home me-2"></i> My Dashboard</a>
+                                <a asp-controller="StudentDashboard" asp-action="BrowseBooks" class="list-group-item list-group-item-action"><i class="fas fa-search me-2"></i> Browse Catalog</a>
+                                <a asp-controller="StudentDashboard" asp-action="MyHistory" class="list-group-item list-group-item-action"><i class="fas fa-history me-2"></i> My History</a>
+                                <a asp-controller="StudentDashboard" asp-action="Profile" class="list-group-item list-group-item-action"><i class="fas fa-user-circle me-2"></i> My Profile</a>
                     }
 
-                </ul>
+                        <a asp-controller="Account" asp-action="Logout" class="list-group-item list-group-item-action text-danger mt-4 border-top border-secondary">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </a>
+                    </div>
+                </div>
+        }
+
+        <div id="page-content-wrapper">
+
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Role") != null)
+            {
+                    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom mb-4 shadow-sm rounded-3 px-3">
+                        <div class="container-fluid">
+                            <button class="btn btn-light text-primary" id="menu-toggle"><i class="fas fa-bars"></i></button>
+
+                            <div class="ms-auto d-flex align-items-center">
+                                <span class="text-muted me-3 d-none d-md-block small">
+                                    <i class="far fa-calendar-alt me-1"></i> @DateTime.Now.ToString("MMMM dd, yyyy")
+                                </span>
+
+                                <div class="dropdown">
+                                    <a class="nav-link dropdown-toggle d-flex align-items-center text-dark text-decoration-none" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img src="https://ui-avatars.com/api/?name=@HttpContextAccessor.HttpContext.Session.GetString("Name")&background=0d6efd&color=fff" 
+                                             alt="Avatar" class="rounded-circle me-2 shadow-sm" width="32" height="32">
+                                        <span class="fw-bold">@HttpContextAccessor.HttpContext.Session.GetString("Name")</span>
+                                    </a>
+
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown">
+                                        <li><h6 class="dropdown-header">Account</h6></li>
+
+                                    @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Student")
+                                    {
+                                                <li><a class="dropdown-item" asp-controller="StudentDashboard" asp-action="Profile"><i class="fas fa-user me-2 text-muted"></i> My Profile</a></li>
+                                    }
+                                    else if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Librarian")
+                                    {
+                                                <li><a class="dropdown-item" asp-controller="Librarian" asp-action="Index"><i class="fas fa-id-badge me-2 text-muted"></i> Staff Profile</a></li>
+                                    }
+                                    else
+                                    {
+                                                <li><a class="dropdown-item" asp-controller="AdminDashboard" asp-action="Index"><i class="fas fa-user-shield me-2 text-muted"></i> Admin Profile</a></li>
+                                    }
+
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+            }
+
+            <div class="container-fluid">
+                @RenderBody()
             </div>
+
+            @if (HttpContextAccessor.HttpContext.Session.GetString("Role") != null)
+            {
+                    <footer class="mt-5 text-center text-muted small pb-3">
+                        &copy; @DateTime.Now.Year Library Management System | 
+                        <span class="text-primary">Logged in as @HttpContextAccessor.HttpContext.Session.GetString("Role")</span>
+                    </footer>
+            }
         </div>
-    </nav>
+    </div>
 
-    <main class="flex-grow-1">
-        @RenderBody()
-    </main>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <footer class="bg-dark text-white text-center py-3 mt-auto">
-        &copy; @DateTime.Now.Year - Library Management.  All rights reserved. 
-    </footer>
+    <script>
+        $("#menu-toggle").click(function(e) { 
+            e.preventDefault(); 
+            $("#wrapper").toggleClass("toggled"); 
+        });
+    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap. bundle.min.js"></script>
-
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

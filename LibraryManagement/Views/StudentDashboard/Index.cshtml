@@ -1,142 +1,82 @@
-﻿@model LibraryManagement.Models.StudentDashboardModel
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 @{
     ViewData["Title"] = "Student Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string name = HttpContextAccessor.HttpContext.Session.GetString("Name");
 }
 
-<div class="container mt-4">
-    <!-- Student Dashboard Banner Image -->
-    <div class="dashboard-banner mb-4">
-        <img src="~/images/student.jpg" alt="Student Dashboard Banner"
-             class="img-fluid rounded shadow" style="max-height:300px; object-fit:cover; width:100%;" />
-    </div>
+<div class="container-fluid pb-5">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="glass-card p-3 h-100">
+                <h5 class="fw-bold px-3 mb-4" style="color: #163832; border-bottom: 2px solid #163832; padding-bottom:10px;">MY LIBRARY</h5>
+                <a asp-action="Index" class="sidebar-link active"><i class="fas fa-home me-2"></i> Overview</a>
+                <a asp-action="MyLoans" class="sidebar-link"><i class="fas fa-book-reader me-2"></i> My Loans</a>
+                <a href="#" class="sidebar-link"><i class="fas fa-history me-2"></i> History</a>
+                <a href="#" class="sidebar-link text-danger"><i class="fas fa-exclamation-circle me-2"></i> Pay Fines</a>
+            </div>
+        </div>
 
-    <h2>Welcome, @Model.StudentName!</h2>
-    <p class="text-muted">Student Dashboard</p>
-
-    <div class="row mt-4">
-        <div class="col-md-3 mb-3">
-            <div style="background:#4e73df; color: white; padding:20px; border-radius:10px; text-align:center;">
-                <h5>My Borrowed Books</h5>
-                <h1>@Model.MyBorrowedBooks</h1>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div style="background:#e74a3b; color: white; padding:20px; border-radius:10px; text-align:center;">
-                <h5>Overdue Books</h5>
-                <h1>@Model.OverdueBooks</h1>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div style="background:#1cc88a; color:white; padding:20px; border-radius:10px; text-align:center;">
-                <h5>Available Books</h5>
-                <h1>@Model.AvailableBooks</h1>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div style="background:#f6c23e; color:white; padding:20px; border-radius:10px; text-align:center;">
-                <h5>Pending Requests</h5>
-                <h1>@Model.PendingRequests</h1>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <a href="/StudentDashboard/SearchBooks" class="btn btn-primary m-1">Search and Borrow Books</a>
-                    <a href="/StudentDashboard/MyBorrowings" class="btn btn-info m-1">My Borrowings</a>
-                    <a href="/StudentDashboard/Profile" class="btn btn-success m-1">My Profile</a>
+        <div class="col-md-9">
+            <div class="banner-container">
+                <img src="~/images/Student.jfif" alt="Student Banner">
+                <div class="banner-text">
+                    <h1 class="display-5 fw-bold">Hello, @name</h1>
+                    <p class="mb-0">Welcome back to your reading portal.</p>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="row mt-4">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5>My Current Requests</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="glass-card p-4 text-center">
+                        <i class="fas fa-book-open fa-2x text-success mb-2"></i>
+                        <h2 class="fw-bold">@ViewBag.BorrowedCount</h2>
+                        <small class="text-muted">Active Loans</small>
+                    </div>
                 </div>
-                <div class="card-body">
-                    @if (Model.MyRequests != null && Model.MyRequests.Count > 0)
+                <div class="col-md-4">
+                    <div class="glass-card p-4 text-center">
+                        <i class="fas fa-check-circle fa-2x text-primary mb-2"></i>
+                        <h2 class="fw-bold">@ViewBag.HistoryCount</h2>
+                        <small class="text-muted">Books Read</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="glass-card p-4 text-center">
+                        <i class="fas fa-wallet fa-2x text-danger mb-2"></i>
+                        <h2 class="fw-bold">$@ViewBag.MyFines</h2>
+                        <small class="text-muted">My Fines</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="glass-card p-4 text-center">
+                        <i class="fas fa-hourglass-half fa-2x text-warning mb-2"></i>
+                        <h2 class="fw-bold">@ViewBag.DueSoon</h2>
+                        <small class="text-muted">Due in 3 Days</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="glass-card p-4 text-center">
+                        <i class="fas fa-times-circle fa-2x text-secondary mb-2"></i>
+                        <h2 class="fw-bold">@ViewBag.LostBooks</h2>
+                        <small class="text-muted">Lost Books</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card p-4">
+                <h4 class="fw-bold mb-3" style="color: #163832;">Announcements</h4>
+                @if (ViewBag.Announcements != null)
+                {
+                    foreach (var item in ViewBag.Announcements)
                     {
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Book Name</th>
-                                        <th>Request Date</th>
-                                        <th>Status</th>
-                                        <th>Due Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                @foreach (var item in Model.MyRequests)
-                                {
-                                            <tr>
-                                                <td>@item.BookName</td>
-                                                <td>@item.RequestDate.ToString("MMM dd, yyyy")</td>
-                                                <td>
-                                            @if (item.Status == "Pending")
-                                            {
-                                                            <span class="badge bg-warning text-dark">Pending</span>
-                                            }
-                                            else if (item.Status == "Approved")
-                                            {
-                                                            <span class="badge bg-success">Borrowed</span>
-                                            }
-                                                </td>
-                                                <td>
-                                            @if (item.DueDate.HasValue)
-                                            {
-                                                @item.DueDate.Value.ToString("MMM dd, yyyy")
-                                            }
-                                            else
-                                            {
-                                                            <span class="text-muted">Pending approval</span>
-                                            }
-                                                </td>
-                                            </tr>
-                                }
-                                </tbody>
-                            </table>
+                                <div class="alert alert-light border shadow-sm mb-2">
+                                    <strong class="text-success">@item.Title</strong>
+                                    <p class="mb-0 text-muted">@item.Content</p>
+                                </div>
                     }
-                    else
-                    {
-                            <p class="text-muted text-center">No current requests.</p>
-                            <div class="text-center">
-                                <a href="/StudentDashboard/SearchBooks" class="btn btn-primary">Browse Books</a>
-                            </div>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5>New Arrivals</h5>
-                </div>
-                <div class="card-body">
-                    @if (Model.RecentBooks != null && Model.RecentBooks.Count > 0)
-                    {
-                        @foreach (var book in Model.RecentBooks)
-                        {
-                                    <div class="mb-2 pb-2 border-bottom">
-                                        <strong>@book.BookName</strong><br>
-                                        <small class="text-muted">by @book.Author</small><br>
-                                        <small class="text-success">@book.Quantity available</small>
-                                    </div>
-                        }
-                    }
-                    else
-                    {
-                            <p class="text-muted">No books available. </p>
-                    }
-                </div>
+                }
             </div>
         </div>
     </div>

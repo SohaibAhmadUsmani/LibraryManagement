@@ -1,0 +1,80 @@
+﻿@model IEnumerable<LibraryManagement.Models.Borrowing>
+
+@{
+    ViewData["Title"] = "Return Desk";
+}
+
+<div class="container-fluid">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">@TempData["Success"] <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    }
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show">@TempData["Warning"] <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold"><i class="fas fa-undo-alt me-2"></i>Return Desk</h2>
+        <span class="badge bg-secondary">Processing Returns</span>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Student</th>
+                        <th>Book</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                            <tr><td colspan="5" class="text-center py-4 text-muted">No issued books pending return.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                            bool isOverdue = DateTime.Now > item.DueDate;
+                                    <tr>
+                                        <td class="ps-4">@item.StudentName</td>
+                                        <td class="fw-bold">@item.BookName</td>
+                                        <td>
+                                    @if (isOverdue)
+                                    {
+                                                    <span class="text-danger fw-bold">@item.DueDate?.ToShortDateString() (OVERDUE)</span>
+                                    }
+                                    else
+                                    {
+                                                    <span>@item.DueDate?.ToShortDateString()</span>
+                                    }
+                                        </td>
+                                        <td><span class="badge bg-warning text-dark">Issued</span></td>
+                                        <td class="text-end pe-4">
+                                            <form asp-action="ProcessReturn" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@item.RequestId" />
+                                                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3" onclick="return confirm('Confirm return?');">
+                                                    <i class="fas fa-check me-1"></i> Return
+                                                </button>
+                                            </form>
+
+                                            <form asp-action="MarkLost" method="post" class="d-inline ms-1">
+                                                <input type="hidden" name="id" value="@item.RequestId" />
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="return confirm('Mark as LOST? This cannot be undone.');">
+                                                    Lost
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,62 @@
+﻿@model IEnumerable<LibraryManagement.Models.Borrowing>
+
+@{
+    ViewData["Title"] = "Student History";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">History: <span class="text-primary">@ViewBag.StudentName</span></h3>
+        <a asp-action="StudentLookup" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Back to Search</a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Book Title</th>
+                        <th>Request Date</th>
+                        <th>Return Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                            <tr><td colspan="4" class="text-center py-3">No history found for this student.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                                    <tr>
+                                        <td class="ps-4 fw-bold">@item.BookName</td>
+                                        <td>@item.RequestDate.ToShortDateString()</td>
+                                        <td>@(item.ReturnedDate?.ToShortDateString() ?? "-")</td>
+                                        <td>
+                                    @if (item.Status == "Returned")
+                                    {
+                                        <span class="badge bg-success">Returned</span>
+                                    }
+                                    else if (item.Status == "Approved")
+                                    {
+                                        <span class="badge bg-warning text-dark">Issued</span>
+                                    }
+                                    else if (item.Status == "Lost")
+                                    {
+                                        <span class="badge bg-danger">LOST</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@item.Status</span>
+                                    }
+                                        </td>
+                                    </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

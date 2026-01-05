@@ -1,0 +1,59 @@
+﻿@model IEnumerable<LibraryManagement.Models.Book>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Library Catalog</h2>
+    <div class="input-group" style="width: 300px;">
+        <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+        <input type="text" id="bookSearch" class="form-control" placeholder="Search title, genre...">
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+     <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+     <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="row" id="bookGrid">
+    @foreach (var item in Model)
+    {
+            <div class="col-md-4 mb-4 book-card">
+                <div class="card h-100 shadow-sm border-0 card-hover">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="badge bg-secondary">@item.Genre</span>
+                            <small class="text-muted">@item.Author</small>
+                        </div>
+                        <h5 class="card-title fw-bold text-primary mb-3">@item.Title</h5>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                        @if (item.Quantity > 0)
+                        {
+                                     <span class="text-success fw-bold"><i class="fas fa-check me-1"></i> Available (@item.Quantity)</span>
+                                     <a asp-action="RequestBook" asp-route-id="@item.BookId" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        Request <i class="fas fa-arrow-right ms-1"></i>
+                                     </a>
+                        }
+                        else
+                        {
+                                    <span class="text-danger fw-bold"><i class="fas fa-times me-1"></i> Out of Stock</span>
+                                    <button class="btn btn-sm btn-secondary rounded-pill px-3" disabled>Unavailable</button>
+                        }
+                        </div>
+                    </div>
+                </div>
+            </div>
+    }
+</div>
+
+<script>
+    document.getElementById('bookSearch').addEventListener('keyup', function() {
+        var val = this.value.toLowerCase();
+        document.querySelectorAll('.book-card').forEach(function(book) {
+            book.style.display = book.innerText.toLowerCase().includes(val) ? 'block' : 'none';
+        });
+    });
+</script>

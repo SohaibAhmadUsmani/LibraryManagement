@@ -1,0 +1,82 @@
+﻿@model IEnumerable<LibraryManagement.Models.Borrowing>
+
+@{
+    ViewData["Title"] = "Issue Desk";
+}
+
+<div class="container-fluid">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">@TempData["Success"] <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">@TempData["Error"] <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    }
+
+    <div class="card border-0 shadow-sm mb-5 bg-light">
+        <div class="card-body p-4">
+            <h4 class="card-title text-primary fw-bold mb-3"><i class="fas fa-desktop me-2"></i>Direct Issue (Walk-in)</h4>
+            <p class="text-muted small mb-3">Use this for students physically present at the desk.</p>
+
+            <form asp-action="DirectIssue" method="post" class="row g-3">
+                <div class="col-md-5">
+                    <label class="form-label fw-bold small">Student Email</label>
+                    <input type="email" name="studentEmail" class="form-control" placeholder="student@university.com" required>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label fw-bold small">Book Title (Exact)</label>
+                    <input type="text" name="bookTitle" class="form-control" placeholder="e.g. The Great Gatsby" required>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="fas fa-paper-plane me-1"></i> Issue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <h4 class="fw-bold mb-3"><i class="fas fa-globe me-2"></i>Pending Online Requests</h4>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Student Name</th>
+                        <th>Book Requested</th>
+                        <th>Request Date</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No pending requests found.</td>
+                            </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in Model)
+                        {
+                                    <tr>
+                                        <td class="ps-4 fw-bold">@item.StudentName</td>
+                                        <td>@item.BookName</td>
+                                        <td>@item.RequestDate.ToShortDateString()</td>
+                                        <td class="text-end pe-4">
+                                            <form asp-action="ApproveRequest" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@item.RequestId" />
+                                                <button class="btn btn-sm btn-success px-3 rounded-pill"><i class="fas fa-check"></i> Approve</button>
+                                            </form>
+                                            <form asp-action="RejectRequest" method="post" class="d-inline ms-1">
+                                                <input type="hidden" name="id" value="@item.RequestId" />
+                                                <button class="btn btn-sm btn-outline-danger px-3 rounded-pill"><i class="fas fa-times"></i> Reject</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

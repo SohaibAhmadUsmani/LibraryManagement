@@ -1,0 +1,77 @@
+﻿@{
+
+    ViewData["Title"] = "Login";
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+
+
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+
+    <div class="image-bg-card col-md-6" style="background-image: url('/images/Login1.jfif');">
+
+
+
+        <div class="image-overlay">
+
+            <div class="text-center w-100 text-white">
+
+                <h2 class="fw-bold mb-2">Welcome Back</h2>
+
+                <p class="mb-4 opacity-75">Access the Library Portal</p>
+
+
+
+                @if (ViewBag.Error != null)
+
+                {
+
+                            <div class="alert alert-danger bg-danger text-white border-0">@ViewBag.Error</div>
+
+                }
+
+
+
+                <form asp-action="Login" method="post">
+
+                    <div class="form-floating mb-3">
+
+                        <input type="text" name="username" class="form-control" id="uInput" placeholder="Username" required>
+
+                        <label for="uInput" class="text-dark">Username</label>
+
+                    </div>
+
+                    <div class="form-floating mb-3">
+
+                        <input type="password" name="password" class="form-control" id="pInput" placeholder="Password" required>
+
+                        <label for="pInput" class="text-dark">Password</label>
+
+                    </div>
+
+
+
+                    <button type="submit" class="btn btn-light w-100 py-3 fw-bold mt-3" style="color: var(--theme-dark);">LOGIN</button>
+
+                </form>
+
+
+
+                <div class="mt-4">
+
+                    <span class="opacity-75">New here? </span>
+
+                    <a asp-action="Signup" class="fw-bold text-white text-decoration-none border-bottom">Create Account</a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
